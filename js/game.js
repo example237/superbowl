@@ -108,7 +108,7 @@ window.addEventListener('load', function () {
                 { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], correct: 2 },
                 { q: "Wie heißt das NFL-Endspiel?", a: ["Super Bowl", "Final", "World Cup"], correct: 0 },
                 { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"], correct: 1 },
-                { q: "Welche Stadt ist bekannt für den Super Bowl?", a: ["Miami", "Berlin", "Paris"], correct: 0 },
+                { q: "Wo findet die beste Super Bowl Party statt?", a: ["Miami", "Elsbethen", "London"], correct: 1 },
                 { q: "Wann ist die Party?", a: ["08.02.2026", "01.01.2026", "10.03.2026"], correct: 0 }
             ];
 
