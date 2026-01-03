@@ -137,7 +137,9 @@ window.addEventListener('load', function () {
             /* =====================
                MOBILE BUTTONS
             ===================== */
-            if (this.sys.game.device.input.touch) {
+            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
+
+            if (isMobile) {
                 this.leftBtn = this.add.image(70, 380, 'btn_left').setInteractive().setScrollFactor(0).setScale(0.5);
                 this.rightBtn = this.add.image(170, 380, 'btn_right').setInteractive().setScrollFactor(0).setScale(0.5);
                 this.jumpBtn = this.add.image(700, 380, 'btn_jump').setInteractive().setScrollFactor(0).setScale(0.5);
@@ -167,8 +169,10 @@ window.addEventListener('load', function () {
         }
 
         update(time) {
+            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
+
             // Desktop Steuerung
-            if (!this.sys.game.device.input.touch) {
+            if (!isMobile) {
                 if (this.cursors.left.isDown) this.player.setVelocityX(-220);
                 else if (this.cursors.right.isDown) this.player.setVelocityX(220);
                 else this.player.setVelocityX(0);
