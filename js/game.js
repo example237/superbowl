@@ -39,6 +39,7 @@ window.addEventListener('load', function () {
         preload() {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
+            this.load.image('background', 'assets/background2.png'); // Hintergrundbild
         }
 
         create() {
@@ -47,7 +48,8 @@ window.addEventListener('load', function () {
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
-            this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
+            // Hintergrund als tileSprite
+            this.background = this.add.tileSprite(400, 225, 800, 450, 'background');
 
             /* =====================
                PLATTFORMEN
@@ -114,6 +116,9 @@ window.addEventListener('load', function () {
                     this.canDoubleJump = false;
                 }
             }
+
+            // Hintergrund scrollt mit Kamera
+            this.background.tilePositionX = this.cameras.main.scrollX;
 
             // Tod, wenn Spieler unter Canvas fällt
             if (this.player.y > 450) {
