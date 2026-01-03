@@ -7,11 +7,9 @@ window.addEventListener('load', function () {
         constructor() { super('NameScene'); }
 
         create() {
-            // Hintergrundfeld
             this.add.rectangle(400, 225, 800, 450, 0x1E90FF).setOrigin(0.5);
             this.add.text(250, 50, 'Gib deinen Namen ein:', { font: '28px Arial', fill: '#fff' });
 
-            // Inputfeld
             const input = this.add.dom(400, 150, 'input',
                 'width:280px;height:40px;font-size:20px;padding:5px;border:2px solid #000;border-radius:5px;text-align:center;');
             input.node.placeholder = "Dein Name";
@@ -25,7 +23,6 @@ window.addEventListener('load', function () {
                 this.scene.start('PlayerSelectScene', { playerName });
             });
 
-            // Mobile Skalierung
             if (this.sys.game.device.input.touch) {
                 const scale = Math.min(window.innerWidth / 800, window.innerHeight / 450);
                 this.cameras.main.setZoom(scale);
@@ -82,7 +79,7 @@ window.addEventListener('load', function () {
             // Kamera folgt Spieler
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
-            // Musik starten
+            // Musik
             this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.5 });
             this.bgMusic.play();
 
@@ -90,7 +87,7 @@ window.addEventListener('load', function () {
             const platforms = this.physics.add.staticGroup();
 
             // Durchgehender Boden
-            platforms.create(worldWidth/2, 425, 'platform').setScale(worldWidth / 400, 1).refreshBody();
+            platforms.create(worldWidth / 2, 425, 'platform').setScale(worldWidth / 400, 1).refreshBody();
 
             // Optimierte Hindernis-Plattformen
             const platformData = [
@@ -124,10 +121,10 @@ window.addEventListener('load', function () {
                 right.on('pointerdown', () => { this.player.setVelocityX(200); });
                 right.on('pointerup', () => { this.player.setVelocityX(0); });
 
-                jump.on('pointerdown', () => { 
+                jump.on('pointerdown', () => {
                     if (this.player.body.blocked.down) {
-                        this.player.setVelocityY(-400); 
-                        this.sound.play('jump'); 
+                        this.player.setVelocityY(-400);
+                        this.sound.play('jump');
                     }
                 });
             }
@@ -145,7 +142,7 @@ window.addEventListener('load', function () {
             }
 
             // Wechsel zum Quiz
-            if (this.player.x >= 1900) { 
+            if (this.player.x >= 1900) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
         }
@@ -186,8 +183,8 @@ window.addEventListener('load', function () {
         constructor() { super('EndScene'); }
         init(data) { this.playerName = data.playerName; }
         create() {
-            this.add.text(100, 200, `Herzlichen Glückwunsch ${this.playerName}!\nDu bist eingeladen zur Super Bowl Party!\n08.02.2026`, 
-            { font: '28px Arial', fill: '#fff', align: 'center' });
+            this.add.text(100, 200, `Herzlichen Glückwunsch ${this.playerName}!\nDu bist eingeladen zur Super Bowl Party!\n08.02.2026`,
+                { font: '28px Arial', fill: '#fff', align: 'center' });
         }
     }
 
