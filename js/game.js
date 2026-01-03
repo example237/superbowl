@@ -70,7 +70,15 @@ window.addEventListener('load', function () {
                 { x: 2350, y: 250, scale: 1.3 },
                 { x: 2550, y: 200, scale: 1.0 },
                 { x: 2750, y: 250, scale: 1.3 },
-                { x: 2950, y: 200, scale: 1.0 }
+                { x: 2950, y: 200, scale: 1.0 },
+
+                // Plattformen bis kurz vor Quiz
+                { x: 3200, y: 250, scale: 1.3 },
+                { x: 3500, y: 220, scale: 1.0 },
+                { x: 3800, y: 250, scale: 1.2 },
+                { x: 4100, y: 220, scale: 1.0 },
+                { x: 4400, y: 250, scale: 1.3 },
+                { x: 4700, y: 220, scale: 1.0 }
             ];
 
             platformsData.forEach(p => {
@@ -121,7 +129,7 @@ window.addEventListener('load', function () {
             }
 
             // Quiz am Ende
-            if (this.player.x > 4500) {
+            if (this.player.x > 4750) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
         }
