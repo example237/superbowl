@@ -48,7 +48,6 @@ window.addEventListener('load', function () {
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
-            // Blauer Hintergrund
             this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
             /* =====================
@@ -125,10 +124,13 @@ window.addEventListener('load', function () {
                 { x: 4400, y: 180 }
             ];
 
-            footballsData.forEach(f => {
+            this.footballsData = footballsData.map(f => {
                 const football = this.footballs.create(f.x, f.y, 'football');
                 football.setScale(0.25);
                 football.body.setAllowGravity(false);
+                football.baseY = f.y;
+                football.angleOffset = Math.random() * Math.PI * 2; // für individuelle Animation
+                return football;
             });
 
             this.physics.add.overlap(this.player, this.footballs, this.collectFootball, null, this);
@@ -146,7 +148,7 @@ window.addEventListener('load', function () {
             this.footballText.setText('Football: ' + this.footballCount);
         }
 
-        update() {
+        update(time) {
             // Links/Rechts
             if (this.cursors.left.isDown) this.player.setVelocityX(-220);
             else if (this.cursors.right.isDown) this.player.setVelocityX(220);
@@ -168,8 +170,13 @@ window.addEventListener('load', function () {
                 this.scene.start('NameScene');
             }
 
-            // Quiz am Ende
-            if (this.player.x > 4750) {
+            // Animation der Footballs (schweben)
+            this.footballs.children.iterate(f => {
+                f.y = f.baseY + Math.sin(time / 500 + f.angleOffset) * 10;
+            });
+
+            // Quiz nur, wenn alle Footballs eingesammelt sind
+            if (this.player.x > 4750 && this.footballCount === this.footballsData.length) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
         }
@@ -277,4 +284,3 @@ window.addEventListener('load', function () {
     });
 
 });
-
