@@ -5,7 +5,7 @@ window.addEventListener('load', function () {
         constructor() { super('NameScene'); }
 
         create() {
-            // Ganzer Hintergrund
+            // Hintergrund
             this.add.rectangle(400, 225, 800, 450, 0x1E90FF).setOrigin(0.5);
 
             // Text
@@ -26,14 +26,12 @@ window.addEventListener('load', function () {
                 this.scene.start('PlayerSelectScene', { playerName });
             });
 
-            // ---- Mobile Optimierung ----
+            // Mobile Optimierung
             if (this.sys.game.device.input.touch) {
-                // Skalierung für kleinere Bildschirme
                 const scale = Math.min(window.innerWidth / 800, window.innerHeight / 450);
                 this.cameras.main.setZoom(scale);
                 this.cameras.main.centerOn(400, 225);
 
-                // Input und Button leicht nach unten verschieben
                 input.setPosition(400, 180);
                 btn.setPosition(400, 250);
             }
@@ -62,24 +60,30 @@ window.addEventListener('load', function () {
         preload() {
             this.load.image('background', 'assets/sprites/background.png');
             this.load.image('player', 'assets/sprites/player.png');
+            this.load.image('platform', 'assets/sprites/platform.png'); // NEU: echte Plattform
             this.load.audio('bg', 'assets/audio/bg.mp3');
             this.load.audio('jump', 'assets/audio/jump.wav');
         }
         create() {
+            // Hintergrund
             this.add.image(400, 225, 'background');
+
+            // Spieler
             this.player = this.physics.add.sprite(100, 350, 'player').setCollideWorldBounds(true);
+            this.player.body.setSize(32, 48);
+            this.player.body.setBounce(0);
 
             this.add.text(10, 10, `Spieler: ${this.playerName}`, { font: '24px Arial', fill: '#fff' });
 
-            // Musik starten
+            // Musik
             this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.5 });
             this.bgMusic.play();
 
             // Plattformen
             const platforms = this.physics.add.staticGroup();
-            platforms.create(400, 400, 'player').setScale(2).refreshBody();
-            platforms.create(600, 300, 'player').setScale(1).refreshBody();
-            platforms.create(200, 250, 'player').setScale(1).refreshBody();
+            platforms.create(400, 400, 'platform').setScale(2).refreshBody();
+            platforms.create(600, 300, 'platform').refreshBody();
+            platforms.create(200, 250, 'platform').refreshBody();
 
             this.physics.add.collider(this.player, platforms);
 
@@ -105,11 +109,13 @@ window.addEventListener('load', function () {
             this.time.delayedCall(10000, () => this.scene.start('QuizScene', { playerName: this.playerName }));
         }
         update() {
+            // Links/Rechts
             if (this.cursors.left.isDown) this.player.setVelocityX(-200);
             else if (this.cursors.right.isDown) this.player.setVelocityX(200);
             else this.player.setVelocityX(0);
 
-            if (this.cursors.up.isDown && this.player.body.touching.down) {
+            // Sprung auf PC
+            if (this.cursors.up.isDown && this.player.body.blocked.down) {
                 this.player.setVelocityY(-400);
                 this.sound.play('jump');
             }
@@ -164,7 +170,7 @@ window.addEventListener('load', function () {
         parent: 'game-container',
         backgroundColor: '#87CEEB',
         physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
-        dom: { createContainer: true }, // wichtig für HTML Input
+        dom: { createContainer: true }, // HTML Input aktiv
         scene: [NameScene, PlayerSelectScene, GameScene, QuizScene, EndScene]
     };
 
