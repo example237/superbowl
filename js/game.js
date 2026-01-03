@@ -1,14 +1,13 @@
 window.addEventListener('load', function () {
 
-    // =====================
-    // NAME
-    // =====================
+    /* =====================
+       NAME
+    ===================== */
     class NameScene extends Phaser.Scene {
         constructor() { super('NameScene'); }
 
         create() {
             this.cameras.main.setScroll(0, 0);
-
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             this.add.text(220, 80, 'Gib deinen Namen ein:', {
@@ -32,12 +31,11 @@ window.addEventListener('load', function () {
         }
     }
 
-    // =====================
-    // GAME
-    // =====================
+    /* =====================
+       GAME
+    ===================== */
     class GameScene extends Phaser.Scene {
         constructor() { super('GameScene'); }
-
         init(data) { this.playerName = data.playerName; }
 
         preload() {
@@ -63,16 +61,14 @@ window.addEventListener('load', function () {
                 .setScale(worldWidth / 400, 1)
                 .refreshBody();
 
-            const data = [
+            [
                 { x: 400, y: 320 },
                 { x: 650, y: 260 },
                 { x: 900, y: 320 },
                 { x: 1200, y: 250 },
                 { x: 1500, y: 320 },
                 { x: 1800, y: 260 }
-            ];
-
-            data.forEach(p => platforms.create(p.x, p.y, 'platform'));
+            ].forEach(p => platforms.create(p.x, p.y, 'platform'));
 
             this.physics.add.collider(this.player, platforms);
 
@@ -97,37 +93,33 @@ window.addEventListener('load', function () {
         }
     }
 
-    // =====================
-    // QUIZ (FIXED)
-    // =====================
+    /* =====================
+       QUIZ
+    ===================== */
     class QuizScene extends Phaser.Scene {
         constructor() { super('QuizScene'); }
-
         init(data) { this.playerName = data.playerName; }
 
         create() {
-            // 🔑 KAMERA RESET
             this.cameras.main.stopFollow();
             this.cameras.main.setScroll(0, 0);
 
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A).setScrollFactor(0);
-
             this.questions = [
-                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"] },
-                { q: "Wie heißt das NFL-Endspiel?", a: ["Super Bowl", "Final", "World Cup"] },
-                { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"] },
-                { q: "Welche Stadt ist bekannt für den Super Bowl?", a: ["Miami", "Berlin", "Paris"] },
-                { q: "Wann ist die Party?", a: ["08.02.2026", "01.01.2026", "10.03.2026"] }
+                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], correct: 2 },
+                { q: "Wie heißt das NFL-Endspiel?", a: ["Super Bowl", "Final", "World Cup"], correct: 0 },
+                { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"], correct: 1 },
+                { q: "Welche Stadt ist bekannt für den Super Bowl?", a: ["Miami", "Berlin", "Paris"], correct: 0 },
+                { q: "Wann ist die Party?", a: ["08.02.2026", "01.01.2026", "10.03.2026"], correct: 0 }
             ];
 
             this.index = 0;
-            this.ui = this.add.container(0, 0);
-
             this.showQuestion();
         }
 
         showQuestion() {
-            this.ui.removeAll(true);
+            this.children.removeAll();
+
+            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A).setScrollFactor(0);
 
             if (this.index >= this.questions.length) {
                 this.scene.start('EndScene', { playerName: this.playerName });
@@ -136,13 +128,11 @@ window.addEventListener('load', function () {
 
             const q = this.questions[this.index];
 
-            const title = this.add.text(50, 50, q.q, {
+            this.add.text(50, 50, q.q, {
                 font: '26px Arial',
                 fill: '#ffffff',
                 wordWrap: { width: 700 }
             }).setScrollFactor(0);
-
-            this.ui.add(title);
 
             q.a.forEach((opt, i) => {
                 const btn = this.add.text(100, 150 + i * 70, opt, {
@@ -152,28 +142,35 @@ window.addEventListener('load', function () {
                     padding: { x: 10, y: 10 }
                 }).setInteractive().setScrollFactor(0);
 
-                btn.on('pointerdown', () => {
-                    this.index++;
-                    this.showQuestion();
-                });
+                btn.on('pointerdown', () => this.showFeedback(i === q.correct));
+            });
+        }
 
-                this.ui.add(btn);
+        showFeedback(correct) {
+            const text = correct ? 'RICHTIG!' : 'FALSCH!';
+            const color = correct ? '#00ff00' : '#ff0000';
+
+            this.add.text(330, 350, text, {
+                font: '32px Arial',
+                fill: color
+            }).setScrollFactor(0);
+
+            this.time.delayedCall(1000, () => {
+                this.index++;
+                this.showQuestion();
             });
         }
     }
 
-    // =====================
-    // END
-    // =====================
+    /* =====================
+       END
+    ===================== */
     class EndScene extends Phaser.Scene {
         constructor() { super('EndScene'); }
-
         init(data) { this.playerName = data.playerName; }
 
         create() {
-            this.cameras.main.stopFollow();
             this.cameras.main.setScroll(0, 0);
-
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             this.add.text(120, 180,
@@ -183,9 +180,9 @@ window.addEventListener('load', function () {
         }
     }
 
-    // =====================
-    // CONFIG
-    // =====================
+    /* =====================
+       CONFIG
+    ===================== */
     new Phaser.Game({
         type: Phaser.AUTO,
         width: 800,
