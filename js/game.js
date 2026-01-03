@@ -37,6 +37,7 @@ window.addEventListener('load', function () {
     class GameScene extends Phaser.Scene {
         constructor() { super('GameScene'); }
         init(data) { this.playerName = data.playerName; }
+
         preload() {
             this.load.image('background', 'assets/sprites/background.png');
             this.load.image('player', 'assets/sprites/player.png');
@@ -44,6 +45,7 @@ window.addEventListener('load', function () {
             this.load.audio('bg', 'assets/audio/bg.mp3');
             this.load.audio('jump', 'assets/audio/jump.wav');
         }
+
         create() {
             const worldWidth = 2000;
             const worldHeight = 450;
@@ -88,6 +90,9 @@ window.addEventListener('load', function () {
             // Cursor Steuerung
             this.cursors = this.input.keyboard.createCursorKeys();
 
+            // Double-tap Logik
+            this.lastUpPress = 0;
+
             // Mobile Buttons
             if (this.sys.game.device.input.touch) {
                 const left = this.add.rectangle(50, 400, 100, 50, 0x0000ff, 0.5).setScrollFactor(0).setInteractive();
@@ -102,21 +107,36 @@ window.addEventListener('load', function () {
 
                 jump.on('pointerdown', () => {
                     if (this.player.body.blocked.down) {
-                        this.player.setVelocityY(-550); // höhere Sprungkraft
+                        const now = this.time.now;
+                        const delta = now - (this.lastUpPress || 0);
+                        if (delta < 300) { // doppelter Sprung
+                            this.player.setVelocityY(-1100);
+                        } else { // normaler Sprung
+                            this.player.setVelocityY(-550);
+                        }
+                        this.lastUpPress = now;
                         this.sound.play('jump');
                     }
                 });
             }
         }
+
         update() {
             // Bewegung PC
             if (this.cursors.left.isDown) this.player.setVelocityX(-200);
             else if (this.cursors.right.isDown) this.player.setVelocityX(200);
             else this.player.setVelocityX(0);
 
-            // Sprung PC
+            // Sprung PC mit Double-Tap
             if (this.cursors.up.isDown && this.player.body.blocked.down) {
-                this.player.setVelocityY(-550); // höhere Sprungkraft
+                const now = this.time.now;
+                const delta = now - (this.lastUpPress || 0);
+                if (delta < 300) {
+                    this.player.setVelocityY(-1100); // doppelter Sprung
+                } else {
+                    this.player.setVelocityY(-550); // normaler Sprung
+                }
+                this.lastUpPress = now;
                 this.sound.play('jump');
             }
 
