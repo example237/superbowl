@@ -44,7 +44,7 @@ window.addEventListener('load', function () {
         }
 
         create() {
-            const worldWidth = 2200;
+            const worldWidth = 4200;
 
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
@@ -57,18 +57,40 @@ window.addEventListener('load', function () {
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
             const platforms = this.physics.add.staticGroup();
-            platforms.create(worldWidth / 2, 430, 'platform')
-                .setScale(worldWidth / 400, 1)
-                .refreshBody();
 
-            [
-                { x: 400, y: 320 },
-                { x: 650, y: 260 },
-                { x: 900, y: 320 },
-                { x: 1200, y: 250 },
-                { x: 1500, y: 320 },
-                { x: 1800, y: 260 }
-            ].forEach(p => platforms.create(p.x, p.y, 'platform'));
+            /* =========
+               BODEN (aus Plattform-Sprite)
+            ========= */
+            for (let x = 0; x < worldWidth; x += 200) {
+                platforms.create(x + 100, 430, 'platform');
+            }
+
+            /* =========
+               HINDERNISSE
+            ========= */
+            const obstacles = [
+                { x: 300, y: 330 },
+                { x: 520, y: 280 },
+                { x: 740, y: 330 },
+
+                { x: 1000, y: 260 },
+                { x: 1250, y: 320 },
+                { x: 1500, y: 260 },
+
+                { x: 1800, y: 300 },
+                { x: 2050, y: 250 },
+                { x: 2300, y: 320 },
+
+                { x: 2600, y: 260 },
+                { x: 2850, y: 320 },
+                { x: 3100, y: 250 },
+
+                { x: 3350, y: 300 },
+                { x: 3600, y: 260 },
+                { x: 3850, y: 320 }
+            ];
+
+            obstacles.forEach(p => platforms.create(p.x, p.y, 'platform'));
 
             this.physics.add.collider(this.player, platforms);
 
@@ -83,11 +105,14 @@ window.addEventListener('load', function () {
 
             if (this.cursors.up.isDown && this.player.body.blocked.down) {
                 const now = this.time.now;
-                this.player.setVelocityY((now - this.lastJump < 300) ? -1100 : -550);
+                this.player.setVelocityY(
+                    (now - this.lastJump < 300) ? -1100 : -550
+                );
                 this.lastJump = now;
             }
 
-            if (this.player.x > 2000) {
+            // Quiz ganz am Ende
+            if (this.player.x > 4000) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
         }
@@ -114,13 +139,11 @@ window.addEventListener('load', function () {
 
             this.index = 0;
             this.feedbackText = null;
-
             this.showQuestion();
         }
 
         showQuestion() {
             this.children.removeAll();
-
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A).setScrollFactor(0);
 
             const q = this.questions[this.index];
@@ -149,13 +172,9 @@ window.addEventListener('load', function () {
             const correct = choice === this.questions[this.index].correct;
 
             this.feedbackText = this.add.text(
-                240,
-                350,
+                240, 350,
                 correct ? 'RICHTIG!' : 'FALSCH – versuche es nochmal',
-                {
-                    font: '28px Arial',
-                    fill: correct ? '#00ff00' : '#ff0000'
-                }
+                { font: '28px Arial', fill: correct ? '#00ff00' : '#ff0000' }
             ).setScrollFactor(0);
 
             if (correct) {
@@ -182,7 +201,8 @@ window.addEventListener('load', function () {
             this.cameras.main.setScroll(0, 0);
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
-            this.add.text(120, 180,
+            this.add.text(
+                120, 180,
                 `Glückwunsch ${this.playerName}!\n\nSUPER BOWL PARTY\n08.02.2026`,
                 { font: '28px Arial', fill: '#ffffff', align: 'center' }
             );
