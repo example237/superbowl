@@ -7,9 +7,11 @@ window.addEventListener('load', function () {
         constructor() { super('NameScene'); }
 
         create() {
+            // Hintergrundfeld
             this.add.rectangle(400, 225, 800, 450, 0x1E90FF).setOrigin(0.5);
             this.add.text(250, 50, 'Gib deinen Namen ein:', { font: '28px Arial', fill: '#fff' });
 
+            // Inputfeld
             const input = this.add.dom(400, 150, 'input',
                 'width:280px;height:40px;font-size:20px;padding:5px;border:2px solid #000;border-radius:5px;text-align:center;');
             input.node.placeholder = "Dein Name";
@@ -23,6 +25,7 @@ window.addEventListener('load', function () {
                 this.scene.start('PlayerSelectScene', { playerName });
             });
 
+            // Mobile Skalierung
             if (this.sys.game.device.input.touch) {
                 const scale = Math.min(window.innerWidth / 800, window.innerHeight / 450);
                 this.cameras.main.setZoom(scale);
@@ -63,33 +66,50 @@ window.addEventListener('load', function () {
             const worldWidth = 2000;
             const worldHeight = 450;
 
+            // Welt & Kamera
             this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
             this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
 
+            // Hintergrund
             this.bg = this.add.tileSprite(400, 225, 800, 450, 'background');
             this.bg.setScrollFactor(0);
 
+            // Spieler
             this.player = this.physics.add.sprite(100, 350, 'player').setCollideWorldBounds(true);
             this.player.body.setSize(32, 48);
             this.player.body.setBounce(0);
 
+            // Kamera folgt Spieler
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
+            // Musik starten
             this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.5 });
             this.bgMusic.play();
 
             // Plattformen
             const platforms = this.physics.add.staticGroup();
+
+            // Durchgehender Boden
             platforms.create(worldWidth/2, 425, 'platform').setScale(worldWidth / 400, 1).refreshBody();
 
-            platforms.create(400, 360, 'platform').refreshBody();
-            platforms.create(800, 330, 'platform').refreshBody();
-            platforms.create(1200, 360, 'platform').refreshBody();
-            platforms.create(1600, 330, 'platform').refreshBody();
-            platforms.create(1900, 360, 'platform').refreshBody();
+            // Optimierte Hindernis-Plattformen
+            const platformData = [
+                { x: 400, y: 360 },
+                { x: 650, y: 340 },
+                { x: 900, y: 360 },
+                { x: 1150, y: 330 },
+                { x: 1400, y: 360 },
+                { x: 1700, y: 340 },
+                { x: 1900, y: 360 }
+            ];
+
+            platformData.forEach(p => {
+                platforms.create(p.x, p.y, 'platform').refreshBody();
+            });
 
             this.physics.add.collider(this.player, platforms);
 
+            // Cursor Steuerung
             this.cursors = this.input.keyboard.createCursorKeys();
 
             // Mobile Buttons
@@ -113,15 +133,18 @@ window.addEventListener('load', function () {
             }
         }
         update() {
+            // Bewegung PC
             if (this.cursors.left.isDown) this.player.setVelocityX(-200);
             else if (this.cursors.right.isDown) this.player.setVelocityX(200);
             else this.player.setVelocityX(0);
 
+            // Sprung PC
             if (this.cursors.up.isDown && this.player.body.blocked.down) {
                 this.player.setVelocityY(-400);
                 this.sound.play('jump');
             }
 
+            // Wechsel zum Quiz
             if (this.player.x >= 1900) { 
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
@@ -168,6 +191,7 @@ window.addEventListener('load', function () {
         }
     }
 
+    // ---- Phaser Config ----
     const config = {
         type: Phaser.AUTO,
         width: 800,
