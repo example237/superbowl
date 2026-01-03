@@ -49,18 +49,13 @@ window.addEventListener('load', function () {
 
             this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
-            this.player = this.physics.add.sprite(100, 120, 'player');
-            this.player.setCollideWorldBounds(false);
-
-            this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-
             /* =========
-               PLATTFORMEN (SICHER)
+               PLATTFORMEN
             ========= */
             this.platforms = this.physics.add.staticGroup();
 
             const platformsData = [
-                { x: 150, y: 200 },
+                { x: 150, y: 300 }, // STARTPLATTFORM
                 { x: 350, y: 260 },
                 { x: 550, y: 200 },
                 { x: 800, y: 260 },
@@ -84,16 +79,14 @@ window.addEventListener('load', function () {
             this.physics.add.collider(this.player, this.platforms);
 
             /* =========
-               TODES-BODEN
+               SPIELER
             ========= */
-            this.deathGround = this.physics.add.staticGroup();
-            for (let x = 0; x < worldWidth; x += 200) {
-                this.deathGround.create(x + 100, 440, 'platform');
-            }
+            // Start auf der ersten Plattform
+            const startPlatform = platformsData[0];
+            this.player = this.physics.add.sprite(startPlatform.x, startPlatform.y - 50, 'player');
+            this.player.setCollideWorldBounds(false);
 
-            this.physics.add.overlap(this.player, this.deathGround, () => {
-                this.scene.start('NameScene');
-            });
+            this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
             this.cursors = this.input.keyboard.createCursorKeys();
             this.lastJump = 0;
@@ -112,6 +105,12 @@ window.addEventListener('load', function () {
                 this.lastJump = now;
             }
 
+            // Tod, wenn Spieler unter Canvas fällt
+            if (this.player.y > 450) {
+                this.scene.start('NameScene');
+            }
+
+            // Quiz am Ende
             if (this.player.x > 4000) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
