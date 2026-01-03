@@ -187,10 +187,10 @@ window.addEventListener('load', function () {
 
             this.questions = [
                 { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], correct: 2 },
-                { q: "Wie heißt das NFL-Endspiel?", a: ["Super Bowl", "Final", "World Cup"], correct: 0 },
-                { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"], correct: 1 },
-                { q: "Welche Stadt ist bekannt für den Super Bowl?", a: ["Miami", "Berlin", "Paris"], correct: 0 },
-                { q: "Wann ist die Party?", a: ["08.02.2026", "01.01.2026", "10.03.2026"], correct: 0 }
+                { q: "Wer gewann den allerersten SuperBowl?", a: ["Dallas Cowboys", "Green Bay Packers", "New England Patriots"], correct: 1 },
+                { q: "Wie viele Punkte gibt es für einen Touchdown?", a: ["3", "6", "7"], correct: 1 },
+                { q: "Welches dieser Teams hat noch nie einen Super Bowl gewonnen?", a: ["Minnesota Vikings", "Denver Broncos", "New England Patriots"], correct: 0 },
+                { q: "Wo feierst du heuer den SuperBowl?", a: ["Alleine zuhause", "San Francisco", "Elsbethen"], correct: 2 }
             ];
 
             this.index = 0;
@@ -277,3 +277,4 @@ window.addEventListener('load', function () {
     });
 
 });
+
