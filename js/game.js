@@ -89,15 +89,15 @@ window.addEventListener('load', function () {
             // Durchgehender Boden
             platforms.create(worldWidth / 2, 425, 'platform').setScale(worldWidth / 400, 1).refreshBody();
 
-            // Optimierte Hindernis-Plattformen
+            // Optimierte Hindernis-Plattformen (größerer vertikaler Abstand)
             const platformData = [
-                { x: 400, y: 360 },
-                { x: 650, y: 340 },
-                { x: 900, y: 360 },
-                { x: 1150, y: 330 },
-                { x: 1400, y: 360 },
-                { x: 1700, y: 340 },
-                { x: 1900, y: 360 }
+                { x: 400, y: 320 },
+                { x: 650, y: 260 },
+                { x: 900, y: 320 },
+                { x: 1150, y: 240 },
+                { x: 1400, y: 320 },
+                { x: 1700, y: 260 },
+                { x: 1900, y: 320 }
             ];
 
             platformData.forEach(p => {
