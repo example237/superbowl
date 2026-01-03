@@ -13,15 +13,13 @@ window.addEventListener('load', function () {
             this.add.text(220, 80, 'Gib deinen Namen ein:', {
                 font: '28px Arial',
                 fill: '#ffffff'
-            }).setScrollFactor(0);
+            });
 
             const input = this.add.dom(400, 170, 'input',
                 'width:300px;height:45px;font-size:20px;text-align:center;');
-            input.setScrollFactor(0);
 
             const btn = this.add.dom(400, 240, 'button',
                 'width:140px;height:50px;font-size:20px;', 'Start');
-            btn.setScrollFactor(0);
 
             btn.addListener('click');
             btn.on('click', () => {
@@ -51,48 +49,51 @@ window.addEventListener('load', function () {
 
             this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
-            this.player = this.physics.add.sprite(100, 350, 'player');
-            this.player.setCollideWorldBounds(true);
+            this.player = this.physics.add.sprite(100, 120, 'player');
+            this.player.setCollideWorldBounds(false);
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
-            const platforms = this.physics.add.staticGroup();
-
             /* =========
-               BODEN (aus Plattform-Sprite)
+               PLATTFORMEN (SICHER)
             ========= */
-            for (let x = 0; x < worldWidth; x += 200) {
-                platforms.create(x + 100, 430, 'platform');
-            }
+            this.platforms = this.physics.add.staticGroup();
 
-            /* =========
-               HINDERNISSE
-            ========= */
-            const obstacles = [
-                { x: 300, y: 330 },
-                { x: 520, y: 280 },
-                { x: 740, y: 330 },
-
-                { x: 1000, y: 260 },
-                { x: 1250, y: 320 },
-                { x: 1500, y: 260 },
-
-                { x: 1800, y: 300 },
-                { x: 2050, y: 250 },
-                { x: 2300, y: 320 },
-
-                { x: 2600, y: 260 },
-                { x: 2850, y: 320 },
-                { x: 3100, y: 250 },
-
-                { x: 3350, y: 300 },
+            const platformsData = [
+                { x: 150, y: 200 },
+                { x: 350, y: 260 },
+                { x: 550, y: 200 },
+                { x: 800, y: 260 },
+                { x: 1050, y: 200 },
+                { x: 1300, y: 260 },
+                { x: 1550, y: 200 },
+                { x: 1800, y: 260 },
+                { x: 2100, y: 200 },
+                { x: 2400, y: 260 },
+                { x: 2700, y: 200 },
+                { x: 3000, y: 260 },
+                { x: 3300, y: 200 },
                 { x: 3600, y: 260 },
-                { x: 3850, y: 320 }
+                { x: 3900, y: 200 }
             ];
 
-            obstacles.forEach(p => platforms.create(p.x, p.y, 'platform'));
+            platformsData.forEach(p =>
+                this.platforms.create(p.x, p.y, 'platform')
+            );
 
-            this.physics.add.collider(this.player, platforms);
+            this.physics.add.collider(this.player, this.platforms);
+
+            /* =========
+               TODES-BODEN
+            ========= */
+            this.deathGround = this.physics.add.staticGroup();
+            for (let x = 0; x < worldWidth; x += 200) {
+                this.deathGround.create(x + 100, 440, 'platform');
+            }
+
+            this.physics.add.overlap(this.player, this.deathGround, () => {
+                this.scene.start('NameScene');
+            });
 
             this.cursors = this.input.keyboard.createCursorKeys();
             this.lastJump = 0;
@@ -111,7 +112,6 @@ window.addEventListener('load', function () {
                 this.lastJump = now;
             }
 
-            // Quiz ganz am Ende
             if (this.player.x > 4000) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
@@ -119,14 +119,13 @@ window.addEventListener('load', function () {
     }
 
     /* =====================
-       QUIZ – MUSS RICHTIG SEIN
+       QUIZ
     ===================== */
     class QuizScene extends Phaser.Scene {
         constructor() { super('QuizScene'); }
         init(data) { this.playerName = data.playerName; }
 
         create() {
-            this.cameras.main.stopFollow();
             this.cameras.main.setScroll(0, 0);
 
             this.questions = [
@@ -138,13 +137,13 @@ window.addEventListener('load', function () {
             ];
 
             this.index = 0;
-            this.feedbackText = null;
+            this.feedback = null;
             this.showQuestion();
         }
 
         showQuestion() {
             this.children.removeAll();
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A).setScrollFactor(0);
+            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             const q = this.questions[this.index];
 
@@ -152,7 +151,7 @@ window.addEventListener('load', function () {
                 font: '26px Arial',
                 fill: '#ffffff',
                 wordWrap: { width: 700 }
-            }).setScrollFactor(0);
+            });
 
             q.a.forEach((opt, i) => {
                 const btn = this.add.text(100, 150 + i * 70, opt, {
@@ -160,22 +159,22 @@ window.addEventListener('load', function () {
                     backgroundColor: '#ffffff',
                     color: '#000',
                     padding: { x: 10, y: 10 }
-                }).setInteractive().setScrollFactor(0);
+                }).setInteractive();
 
-                btn.on('pointerdown', () => this.checkAnswer(i));
+                btn.on('pointerdown', () => this.check(i));
             });
         }
 
-        checkAnswer(choice) {
-            if (this.feedbackText) this.feedbackText.destroy();
+        check(choice) {
+            if (this.feedback) this.feedback.destroy();
 
             const correct = choice === this.questions[this.index].correct;
 
-            this.feedbackText = this.add.text(
+            this.feedback = this.add.text(
                 240, 350,
                 correct ? 'RICHTIG!' : 'FALSCH – versuche es nochmal',
                 { font: '28px Arial', fill: correct ? '#00ff00' : '#ff0000' }
-            ).setScrollFactor(0);
+            );
 
             if (correct) {
                 this.time.delayedCall(1000, () => {
@@ -198,9 +197,7 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         create() {
-            this.cameras.main.setScroll(0, 0);
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-
             this.add.text(
                 120, 180,
                 `Glückwunsch ${this.playerName}!\n\nSUPER BOWL PARTY\n08.02.2026`,
