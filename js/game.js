@@ -39,6 +39,7 @@ window.addEventListener('load', function () {
         preload() {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
+            this.load.image('coin', 'assets/sprites/ball.png'); // Münzen
         }
 
         create() {
@@ -104,6 +105,46 @@ window.addEventListener('load', function () {
 
             this.cursors = this.input.keyboard.createCursorKeys();
             this.canDoubleJump = true;
+
+            /* =====================
+               MÜNZEN
+            ===================== */
+            this.coins = this.physics.add.group();
+            this.coinCount = 0;
+
+            // Beispiel: Münzen auf einigen Plattformen
+            const coinsData = [
+                { x: 350, y: 200 },
+                { x: 550, y: 150 },
+                { x: 750, y: 200 },
+                { x: 950, y: 150 },
+                { x: 1150, y: 200 },
+                { x: 1350, y: 150 },
+                { x: 1550, y: 200 },
+                { x: 1750, y: 150 },
+                { x: 1950, y: 200 },
+                { x: 2150, y: 150 }
+            ];
+
+            coinsData.forEach(c => {
+                const coin = this.coins.create(c.x, c.y, 'coin');
+                coin.setScale(0.5);
+                coin.body.setAllowGravity(false);
+            });
+
+            this.physics.add.overlap(this.player, this.coins, this.collectCoin, null, this);
+
+            // Münz-Zähler
+            this.coinText = this.add.text(10, 10, 'Münzen: 0', {
+                font: '24px Arial',
+                fill: '#ffffff'
+            }).setScrollFactor(0);
+        }
+
+        collectCoin(player, coin) {
+            coin.destroy();
+            this.coinCount++;
+            this.coinText.setText('Münzen: ' + this.coinCount);
         }
 
         update() {
