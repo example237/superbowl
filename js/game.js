@@ -42,46 +42,47 @@ window.addEventListener('load', function () {
         }
 
         create() {
-            const worldWidth = 4200;
+            const worldWidth = 5000;
 
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
             this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
-            /* =========
+            /* =====================
                PLATTFORMEN
-            ========= */
+            ===================== */
             this.platforms = this.physics.add.staticGroup();
 
+            // Plattformen: x, y, scaleX (breite)
             const platformsData = [
-                { x: 150, y: 300 }, // STARTPLATTFORM
-                { x: 350, y: 260 },
-                { x: 550, y: 200 },
-                { x: 800, y: 260 },
-                { x: 1050, y: 200 },
-                { x: 1300, y: 260 },
-                { x: 1550, y: 200 },
-                { x: 1800, y: 260 },
-                { x: 2100, y: 200 },
-                { x: 2400, y: 260 },
-                { x: 2700, y: 200 },
-                { x: 3000, y: 260 },
-                { x: 3300, y: 200 },
-                { x: 3600, y: 260 },
-                { x: 3900, y: 200 }
+                { x: 150, y: 300, scale: 1.5 },  // Startplattform
+                { x: 400, y: 260, scale: 1.2 },
+                { x: 650, y: 220, scale: 1.0 },
+                { x: 950, y: 260, scale: 1.3 },
+                { x: 1250, y: 200, scale: 1.0 },
+                { x: 1550, y: 260, scale: 1.4 },
+                { x: 1850, y: 220, scale: 1.1 },
+                { x: 2150, y: 260, scale: 1.3 },
+                { x: 2450, y: 200, scale: 1.2 },
+                { x: 2750, y: 260, scale: 1.5 },
+                { x: 3050, y: 220, scale: 1.2 },
+                { x: 3350, y: 260, scale: 1.3 },
+                { x: 3650, y: 200, scale: 1.0 },
+                { x: 3950, y: 260, scale: 1.4 },
+                { x: 4250, y: 220, scale: 1.2 }
             ];
 
-            platformsData.forEach(p =>
-                this.platforms.create(p.x, p.y, 'platform')
-            );
+            platformsData.forEach(p => {
+                const plat = this.platforms.create(p.x, p.y, 'platform');
+                plat.setScale(p.scale, 1).refreshBody();
+            });
 
             this.physics.add.collider(this.player, this.platforms);
 
-            /* =========
+            /* =====================
                SPIELER
-            ========= */
-            // Start auf der ersten Plattform
+            ===================== */
             const startPlatform = platformsData[0];
             this.player = this.physics.add.sprite(startPlatform.x, startPlatform.y - 50, 'player');
             this.player.setCollideWorldBounds(false);
@@ -111,7 +112,7 @@ window.addEventListener('load', function () {
             }
 
             // Quiz am Ende
-            if (this.player.x > 4000) {
+            if (this.player.x > 4500) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
         }
