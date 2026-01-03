@@ -131,7 +131,7 @@ window.addEventListener('load', function () {
             this.physics.add.overlap(this.player, this.coins, this.collectCoin, null, this);
 
             // Münz-Zähler
-            this.coinText = this.add.text(10, 10, 'Münzen: 0', {
+            this.coinText = this.add.text(10, 10, 'Football: 0', {
                 font: '24px Arial',
                 fill: '#ffffff'
             }).setScrollFactor(0);
@@ -140,7 +140,7 @@ window.addEventListener('load', function () {
         collectCoin(player, coin) {
             coin.destroy();
             this.coinCount++;
-            this.coinText.setText('Münzen: ' + this.coinCount);
+            this.coinText.setText('Football: ' + this.coinCount);
         }
 
         update() {
@@ -274,3 +274,4 @@ window.addEventListener('load', function () {
     });
 
 });
+
