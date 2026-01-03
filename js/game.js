@@ -39,7 +39,7 @@ window.addEventListener('load', function () {
         preload() {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
-            this.load.image('coin', 'assets/sprites/ball.png');
+            this.load.image('football', 'assets/sprites/ball.png'); // Footballs
         }
 
         create() {
@@ -105,42 +105,45 @@ window.addEventListener('load', function () {
             this.canDoubleJump = true;
 
             /* =====================
-               MÜNZEN
+               FOOTBALLS
             ===================== */
-            this.coins = this.physics.add.group();
-            this.coinCount = 0;
+            this.footballs = this.physics.add.group();
+            this.footballCount = 0;
 
-            // Münzen nur auf bestimmten Sprungstrecken in der Luft
-            const coinsData = [
-                { x: 250, y: 200 },
-                { x: 600, y: 150 },
-                { x: 950, y: 150 },
-                { x: 1350, y: 150 },
-                { x: 1750, y: 150 },
-                { x: 2150, y: 150 },
+            // Footballs in der Luft zwischen Plattformen
+            const footballsData = [
+                { x: 250, y: 180 },
+                { x: 500, y: 160 },
+                { x: 800, y: 200 },
+                { x: 1100, y: 180 },
+                { x: 1500, y: 160 },
+                { x: 1900, y: 200 },
+                { x: 2300, y: 180 },
+                { x: 2700, y: 160 },
+                { x: 3200, y: 180 },
                 { x: 3800, y: 200 },
                 { x: 4400, y: 180 }
             ];
 
-            coinsData.forEach(c => {
-                const coin = this.coins.create(c.x, c.y, 'coin');
-                coin.setScale(0.25); // stark verkleinert
-                coin.body.setAllowGravity(false);
+            footballsData.forEach(f => {
+                const football = this.footballs.create(f.x, f.y, 'football');
+                football.setScale(0.25);
+                football.body.setAllowGravity(false);
             });
 
-            this.physics.add.overlap(this.player, this.coins, this.collectCoin, null, this);
+            this.physics.add.overlap(this.player, this.footballs, this.collectFootball, null, this);
 
-            // Münz-Zähler
-            this.coinText = this.add.text(10, 10, 'Football: 0', {
+            // Football-Zähler
+            this.footballText = this.add.text(10, 10, 'Football: 0', {
                 font: '24px Arial',
                 fill: '#ffffff'
             }).setScrollFactor(0);
         }
 
-        collectCoin(player, coin) {
-            coin.destroy();
-            this.coinCount++;
-            this.coinText.setText('Football: ' + this.coinCount);
+        collectFootball(player, football) {
+            football.destroy();
+            this.footballCount++;
+            this.footballText.setText('Football: ' + this.footballCount);
         }
 
         update() {
@@ -274,4 +277,3 @@ window.addEventListener('load', function () {
     });
 
 });
-
