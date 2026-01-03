@@ -54,7 +54,6 @@ window.addEventListener('load', function () {
             ===================== */
             this.platforms = this.physics.add.staticGroup();
 
-            // Plattformen: x, y, scaleX (breite)
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },  // Startplattform
                 { x: 400, y: 260, scale: 1.2 },
@@ -78,31 +77,35 @@ window.addEventListener('load', function () {
                 plat.setScale(p.scale, 1).refreshBody();
             });
 
-            this.physics.add.collider(this.player, this.platforms);
-
             /* =====================
                SPIELER
             ===================== */
             const startPlatform = platformsData[0];
             this.player = this.physics.add.sprite(startPlatform.x, startPlatform.y - 50, 'player');
             this.player.setCollideWorldBounds(false);
+            this.player.setGravityY(900);
+            this.player.setBounce(0);  // kein Abprallen
+            this.player.body.setSize(this.player.width, this.player.height, true);
 
-            this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+            this.physics.add.collider(this.player, this.platforms);
 
             this.cursors = this.input.keyboard.createCursorKeys();
             this.lastJump = 0;
+
+            this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
         }
 
         update() {
+            // Links/Rechts
             if (this.cursors.left.isDown) this.player.setVelocityX(-220);
             else if (this.cursors.right.isDown) this.player.setVelocityX(220);
             else this.player.setVelocityX(0);
 
+            // Sprung
             if (this.cursors.up.isDown && this.player.body.blocked.down) {
                 const now = this.time.now;
-                this.player.setVelocityY(
-                    (now - this.lastJump < 300) ? -1100 : -550
-                );
+                // Doppel-Sprung bei kurzem Abstand
+                this.player.setVelocityY((now - this.lastJump < 300) ? -1100 : -550);
                 this.lastJump = now;
             }
 
