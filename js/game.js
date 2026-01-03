@@ -1,42 +1,43 @@
 window.addEventListener('load', function () {
 
-    console.log("game.js geladen");
-
-    // ---- Szene 1: Nameeingabe ----
+    // =========================
+    // Szene 1: Name
+    // =========================
     class NameScene extends Phaser.Scene {
         constructor() { super('NameScene'); }
 
         create() {
-            this.add.rectangle(400, 225, 800, 450, 0x1E90FF).setOrigin(0.5);
-            this.add.text(250, 50, 'Gib deinen Namen ein:', { font: '28px Arial', fill: '#fff' });
+            this.add.rectangle(400, 225, 800, 450, 0x1E90FF);
 
-            const input = this.add.dom(400, 150, 'input',
-                'width:280px;height:40px;font-size:20px;padding:5px;border:2px solid #000;border-radius:5px;text-align:center;');
-            input.node.placeholder = "Dein Name";
+            this.add.text(220, 60, 'Gib deinen Namen ein:', {
+                font: '28px Arial',
+                fill: '#ffffff'
+            });
 
-            const btn = this.add.dom(400, 220, 'button',
-                'width:120px;height:50px;font-size:20px;border-radius:5px;background-color:#28a745;color:#fff;', 'Start');
+            const input = this.add.dom(400, 160, 'input',
+                'width:300px;height:45px;font-size:20px;text-align:center;');
+            input.node.placeholder = "Name";
+
+            const btn = this.add.dom(400, 230, 'button',
+                'width:140px;height:50px;font-size:20px;', 'Start');
 
             btn.addListener('click');
             btn.on('click', () => {
                 const playerName = input.node.value || 'Spieler';
                 this.scene.start('GameScene', { playerName });
             });
-
-            if (this.sys.game.device.input.touch) {
-                const scale = Math.min(window.innerWidth / 800, window.innerHeight / 450);
-                this.cameras.main.setZoom(scale);
-                this.cameras.main.centerOn(400, 225);
-                input.setPosition(400, 180);
-                btn.setPosition(400, 250);
-            }
         }
     }
 
-    // ---- Szene 2: Jump’n’Run Hauptspiel ----
+    // =========================
+    // Szene 2: Spiel
+    // =========================
     class GameScene extends Phaser.Scene {
         constructor() { super('GameScene'); }
-        init(data) { this.playerName = data.playerName; }
+
+        init(data) {
+            this.playerName = data.playerName;
+        }
 
         preload() {
             this.load.image('background', 'assets/sprites/background.png');
@@ -47,128 +48,164 @@ window.addEventListener('load', function () {
         }
 
         create() {
-            const worldWidth = 2000;
-            const worldHeight = 450;
+            const worldWidth = 2200;
 
-            this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
-            this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
+            this.physics.world.setBounds(0, 0, worldWidth, 450);
+            this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
             // Hintergrund
             this.bg = this.add.tileSprite(400, 225, 800, 450, 'background');
             this.bg.setScrollFactor(0);
 
             // Spieler
-            this.player = this.physics.add.sprite(100, 350, 'player').setCollideWorldBounds(true);
-            this.player.body.setSize(32, 48);
-            this.player.body.setBounce(0);
+            this.player = this.physics.add.sprite(100, 350, 'player');
+            this.player.setCollideWorldBounds(true);
 
-            this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+            this.cameras.main.startFollow(this.player, true, 0.08, 0.08);
 
             // Musik
-            this.bgMusic = this.sound.add('bg', { loop: true, volume: 0.5 });
-            this.bgMusic.play();
+            this.sound.add('bg', { loop: true, volume: 0.4 }).play();
 
             // Plattformen
             const platforms = this.physics.add.staticGroup();
-            platforms.create(worldWidth / 2, 425, 'platform').setScale(worldWidth / 400, 1).refreshBody();
 
+            // Boden
+            platforms.create(worldWidth / 2, 430, 'platform')
+                .setScale(worldWidth / 400, 1)
+                .refreshBody();
+
+            // Hindernisse (gut springbar)
             const platformData = [
-                { x: 400, y: 320 },
-                { x: 650, y: 260 },
-                { x: 900, y: 320 },
-                { x: 1150, y: 240 },
-                { x: 1400, y: 320 },
-                { x: 1700, y: 260 },
-                { x: 1900, y: 320 }
+                { x: 450, y: 320 },
+                { x: 700, y: 260 },
+                { x: 950, y: 320 },
+                { x: 1200, y: 250 },
+                { x: 1500, y: 320 },
+                { x: 1800, y: 260 }
             ];
+
             platformData.forEach(p => {
                 platforms.create(p.x, p.y, 'platform').refreshBody();
             });
 
             this.physics.add.collider(this.player, platforms);
 
-            // Cursor Steuerung
+            // Steuerung
             this.cursors = this.input.keyboard.createCursorKeys();
-
-            // Double-tap Logik
-            this.lastUpPress = 0;
-
-            // Mobile Buttons
-            if (this.sys.game.device.input.touch) {
-                const left = this.add.rectangle(50, 400, 100, 50, 0x0000ff, 0.5).setScrollFactor(0).setInteractive();
-                const right = this.add.rectangle(750, 400, 100, 50, 0x0000ff, 0.5).setScrollFactor(0).setInteractive();
-                const jump = this.add.rectangle(400, 400, 100, 50, 0x00ff00, 0.5).setScrollFactor(0).setInteractive();
-
-                left.on('pointerdown', () => { this.player.setVelocityX(-200); });
-                left.on('pointerup', () => { this.player.setVelocityX(0); });
-
-                right.on('pointerdown', () => { this.player.setVelocityX(200); });
-                right.on('pointerup', () => { this.player.setVelocityX(0); });
-
-                jump.on('pointerdown', () => {
-                    if (this.player.body.blocked.down) {
-                        const now = this.time.now;
-                        const delta = now - (this.lastUpPress || 0);
-                        if (delta < 300) { // doppelter Sprung
-                            this.player.setVelocityY(-1100);
-                        } else { // normaler Sprung
-                            this.player.setVelocityY(-550);
-                        }
-                        this.lastUpPress = now;
-                        this.sound.play('jump');
-                    }
-                });
-            }
+            this.lastJumpTime = 0;
         }
 
         update() {
-            // Bewegung PC
-            if (this.cursors.left.isDown) this.player.setVelocityX(-200);
-            else if (this.cursors.right.isDown) this.player.setVelocityX(200);
-            else this.player.setVelocityX(0);
+            // Bewegung
+            if (this.cursors.left.isDown) {
+                this.player.setVelocityX(-220);
+            } else if (this.cursors.right.isDown) {
+                this.player.setVelocityX(220);
+            } else {
+                this.player.setVelocityX(0);
+            }
 
-            // Sprung PC mit Double-Tap
+            // Sprung / Doppelsprung
             if (this.cursors.up.isDown && this.player.body.blocked.down) {
                 const now = this.time.now;
-                const delta = now - (this.lastUpPress || 0);
+                const delta = now - this.lastJumpTime;
+
                 if (delta < 300) {
-                    this.player.setVelocityY(-1100); // doppelter Sprung
+                    this.player.setVelocityY(-1100); // Doppelsprung
                 } else {
                     this.player.setVelocityY(-550); // normaler Sprung
                 }
-                this.lastUpPress = now;
+
                 this.sound.play('jump');
+                this.lastJumpTime = now;
             }
 
-            // Wechsel zum Quiz
-            if (this.player.x >= 1900) {
+            // Quiz starten am Ende
+            if (this.player.x > 2000) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
         }
     }
 
-    // ---- Szene 3: Quiz ----
+    // =========================
+    // Szene 3: Quiz
+    // =========================
     class QuizScene extends Phaser.Scene {
         constructor() { super('QuizScene'); }
-        preload() { this.load.json('questions', 'data/questions.json'); }
-        init(data) { this.playerName = data.playerName; }
+
+        preload() {
+            this.load.json('questions', 'data/questions.json');
+        }
+
+        init(data) {
+            this.playerName = data.playerName;
+        }
+
         create() {
-            const questions = this.cache.json.get('questions');
+            this.add.rectangle(400, 225, 800, 450, 0x1E90FF);
+
+            let questions = this.cache.json.get('questions');
+
+            if (!questions || questions.length === 0) {
+                questions = [
+                    {
+                        question: "Wie viele Spieler stehen pro Team auf dem Feld?",
+                        options: ["9", "10", "11"],
+                        answer: 2
+                    },
+                    {
+                        question: "Wie heißt das NFL-Endspiel?",
+                        options: ["Super Bowl", "World Cup", "Final"],
+                        answer: 0
+                    },
+                    {
+                        question: "Wie viele Punkte gibt ein Touchdown?",
+                        options: ["3", "6", "7"],
+                        answer: 1
+                    },
+                    {
+                        question: "Welche Stadt ist für den Super Bowl bekannt?",
+                        options: ["Miami", "Berlin", "Paris"],
+                        answer: 0
+                    },
+                    {
+                        question: "Wann ist die Party?",
+                        options: ["08.02.2026", "01.01.2026", "10.03.2026"],
+                        answer: 0
+                    }
+                ];
+            }
+
             let idx = 0;
 
             const showQuestion = () => {
-                if (idx >= questions.length) {
-                    this.scene.start('EndScene', { playerName: this.playerName }); return;
-                }
                 this.children.removeAll();
+                this.add.rectangle(400, 225, 800, 450, 0x1E90FF);
+
+                if (idx >= questions.length) {
+                    this.scene.start('EndScene', { playerName: this.playerName });
+                    return;
+                }
+
                 const q = questions[idx];
-                this.add.text(50, 50, q.question, { font: '28px Arial', fill: '#fff' });
+
+                this.add.text(50, 40, q.question, {
+                    font: '26px Arial',
+                    fill: '#ffffff',
+                    wordWrap: { width: 700 }
+                });
 
                 q.options.forEach((opt, i) => {
-                    const btn = this.add.text(50, 150 + i * 60, opt, { font: '24px Arial', fill: '#0f0' }).setInteractive();
+                    const btn = this.add.text(100, 150 + i * 70, opt, {
+                        font: '24px Arial',
+                        backgroundColor: '#ffffff',
+                        color: '#000',
+                        padding: { x: 10, y: 10 }
+                    }).setInteractive();
+
                     btn.on('pointerdown', () => {
-                        if (i === q.answer) this.add.text(400, 400, 'Richtig!', { font: '28px Arial', fill: '#ff0' });
-                        idx++; this.time.delayedCall(500, showQuestion);
+                        idx++;
+                        this.time.delayedCall(300, showQuestion);
                     });
                 });
             };
@@ -177,28 +214,50 @@ window.addEventListener('load', function () {
         }
     }
 
-    // ---- Szene 4: Ende ----
+    // =========================
+    // Szene 4: Ende
+    // =========================
     class EndScene extends Phaser.Scene {
         constructor() { super('EndScene'); }
-        init(data) { this.playerName = data.playerName; }
+
+        init(data) {
+            this.playerName = data.playerName;
+        }
+
         create() {
-            this.add.text(100, 200, `Herzlichen Glückwunsch ${this.playerName}!\nDu bist eingeladen zur Super Bowl Party!\n08.02.2026`,
-                { font: '28px Arial', fill: '#fff', align: 'center' });
+            this.add.rectangle(400, 225, 800, 450, 0x1E90FF);
+
+            this.add.text(120, 170,
+                `Herzlichen Glückwunsch ${this.playerName}!\n\n` +
+                `Du bist eingeladen zur\nSUPER BOWL PARTY\n\n08.02.2026`,
+                {
+                    font: '28px Arial',
+                    fill: '#ffffff',
+                    align: 'center'
+                }
+            );
         }
     }
 
-    // ---- Phaser Config ----
+    // =========================
+    // Phaser Config
+    // =========================
     const config = {
         type: Phaser.AUTO,
         width: 800,
         height: 450,
         parent: 'game-container',
-        backgroundColor: '#87CEEB',
-        physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
+        backgroundColor: '#000000',
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 900 },
+                debug: false
+            }
+        },
         dom: { createContainer: true },
         scene: [NameScene, GameScene, QuizScene, EndScene]
     };
 
     new Phaser.Game(config);
-
 });
