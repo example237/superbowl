@@ -15,12 +15,12 @@ window.addEventListener('load', function () {
             input.node.placeholder = "Dein Name";
 
             const btn = this.add.dom(400, 220, 'button',
-                'width:120px;height:50px;font-size:20px;border-radius:5px;background-color:#28a745;color:#fff;', 'Weiter');
+                'width:120px;height:50px;font-size:20px;border-radius:5px;background-color:#28a745;color:#fff;', 'Start');
 
             btn.addListener('click');
             btn.on('click', () => {
                 const playerName = input.node.value || 'Spieler';
-                this.scene.start('PlayerSelectScene', { playerName });
+                this.scene.start('GameScene', { playerName });
             });
 
             if (this.sys.game.device.input.touch) {
@@ -33,22 +33,7 @@ window.addEventListener('load', function () {
         }
     }
 
-    // ---- Szene 2: Spieler-Auswahl ----
-    class PlayerSelectScene extends Phaser.Scene {
-        constructor() { super('PlayerSelectScene'); }
-        init(data) { this.playerName = data.playerName; }
-        preload() { this.load.image('player', 'assets/sprites/player.png'); }
-        create() {
-            this.add.text(200, 50, `Hallo ${this.playerName}, wähle deinen Spieler:`, { font: '28px Arial', fill: '#fff' });
-            const p = this.add.sprite(400, 250, 'player').setInteractive();
-
-            p.on('pointerdown', () => {
-                this.scene.start('GameScene', { playerName: this.playerName });
-            });
-        }
-    }
-
-    // ---- Szene 3: Jump’n’Run Hauptspiel ----
+    // ---- Szene 2: Jump’n’Run Hauptspiel ----
     class GameScene extends Phaser.Scene {
         constructor() { super('GameScene'); }
         init(data) { this.playerName = data.playerName; }
@@ -63,7 +48,6 @@ window.addEventListener('load', function () {
             const worldWidth = 2000;
             const worldHeight = 450;
 
-            // Welt & Kamera
             this.physics.world.setBounds(0, 0, worldWidth, worldHeight);
             this.cameras.main.setBounds(0, 0, worldWidth, worldHeight);
 
@@ -76,7 +60,6 @@ window.addEventListener('load', function () {
             this.player.body.setSize(32, 48);
             this.player.body.setBounce(0);
 
-            // Kamera folgt Spieler
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
             // Musik
@@ -85,11 +68,8 @@ window.addEventListener('load', function () {
 
             // Plattformen
             const platforms = this.physics.add.staticGroup();
-
-            // Durchgehender Boden
             platforms.create(worldWidth / 2, 425, 'platform').setScale(worldWidth / 400, 1).refreshBody();
 
-            // Optimierte Hindernis-Plattformen (größerer vertikaler Abstand)
             const platformData = [
                 { x: 400, y: 320 },
                 { x: 650, y: 260 },
@@ -99,7 +79,6 @@ window.addEventListener('load', function () {
                 { x: 1700, y: 260 },
                 { x: 1900, y: 320 }
             ];
-
             platformData.forEach(p => {
                 platforms.create(p.x, p.y, 'platform').refreshBody();
             });
@@ -123,7 +102,7 @@ window.addEventListener('load', function () {
 
                 jump.on('pointerdown', () => {
                     if (this.player.body.blocked.down) {
-                        this.player.setVelocityY(-400);
+                        this.player.setVelocityY(-550); // höhere Sprungkraft
                         this.sound.play('jump');
                     }
                 });
@@ -137,7 +116,7 @@ window.addEventListener('load', function () {
 
             // Sprung PC
             if (this.cursors.up.isDown && this.player.body.blocked.down) {
-                this.player.setVelocityY(-400);
+                this.player.setVelocityY(-550); // höhere Sprungkraft
                 this.sound.play('jump');
             }
 
@@ -148,7 +127,7 @@ window.addEventListener('load', function () {
         }
     }
 
-    // ---- Szene 4: Quiz ----
+    // ---- Szene 3: Quiz ----
     class QuizScene extends Phaser.Scene {
         constructor() { super('QuizScene'); }
         preload() { this.load.json('questions', 'data/questions.json'); }
@@ -178,7 +157,7 @@ window.addEventListener('load', function () {
         }
     }
 
-    // ---- Szene 5: Ende / Einladung ----
+    // ---- Szene 4: Ende ----
     class EndScene extends Phaser.Scene {
         constructor() { super('EndScene'); }
         init(data) { this.playerName = data.playerName; }
@@ -197,7 +176,7 @@ window.addEventListener('load', function () {
         backgroundColor: '#87CEEB',
         physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
         dom: { createContainer: true },
-        scene: [NameScene, PlayerSelectScene, GameScene, QuizScene, EndScene]
+        scene: [NameScene, GameScene, QuizScene, EndScene]
     };
 
     new Phaser.Game(config);
