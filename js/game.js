@@ -39,7 +39,10 @@ window.addEventListener('load', function () {
         preload() {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
-            this.load.image('football', 'assets/sprites/ball.png'); // Footballs
+            this.load.image('football', 'assets/sprites/ball.png');
+            this.load.image('btn_left', 'assets/sprites/btn_left.png');
+            this.load.image('btn_right', 'assets/sprites/btn_right.png');
+            this.load.image('btn_jump', 'assets/sprites/btn_jump.png');
         }
 
         create() {
@@ -54,7 +57,6 @@ window.addEventListener('load', function () {
                PLATTFORMEN
             ===================== */
             this.platforms = this.physics.add.staticGroup();
-
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },
                 { x: 350, y: 250, scale: 1.2 },
@@ -109,19 +111,11 @@ window.addEventListener('load', function () {
             this.footballs = this.physics.add.group();
             this.footballCount = 0;
 
-            // Footballs in der Luft zwischen Plattformen
             const footballsData = [
-                { x: 250, y: 180 },
-                { x: 500, y: 160 },
-                { x: 800, y: 200 },
-                { x: 1100, y: 180 },
-                { x: 1500, y: 160 },
-                { x: 1900, y: 200 },
-                { x: 2300, y: 180 },
-                { x: 2700, y: 160 },
-                { x: 3200, y: 180 },
-                { x: 3800, y: 200 },
-                { x: 4400, y: 180 }
+                { x: 250, y: 180 }, { x: 500, y: 160 }, { x: 800, y: 200 },
+                { x: 1100, y: 180 }, { x: 1500, y: 160 }, { x: 1900, y: 200 },
+                { x: 2300, y: 180 }, { x: 2700, y: 160 }, { x: 3200, y: 180 },
+                { x: 3800, y: 200 }, { x: 4400, y: 180 }
             ];
 
             this.footballsData = footballsData.map(f => {
@@ -129,17 +123,41 @@ window.addEventListener('load', function () {
                 football.setScale(0.25);
                 football.body.setAllowGravity(false);
                 football.baseY = f.y;
-                football.angleOffset = Math.random() * Math.PI * 2; // für individuelle Animation
+                football.angleOffset = Math.random() * Math.PI * 2;
                 return football;
             });
 
             this.physics.add.overlap(this.player, this.footballs, this.collectFootball, null, this);
 
-            // Football-Zähler
             this.footballText = this.add.text(10, 10, 'Football: 0', {
                 font: '24px Arial',
                 fill: '#ffffff'
             }).setScrollFactor(0);
+
+            /* =====================
+               MOBILE BUTTONS
+            ===================== */
+            if (this.sys.game.device.input.touch) {
+                this.leftBtn = this.add.image(70, 380, 'btn_left').setInteractive().setScrollFactor(0).setScale(0.5);
+                this.rightBtn = this.add.image(170, 380, 'btn_right').setInteractive().setScrollFactor(0).setScale(0.5);
+                this.jumpBtn = this.add.image(700, 380, 'btn_jump').setInteractive().setScrollFactor(0).setScale(0.5);
+
+                this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
+                this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
+
+                this.rightBtn.on('pointerdown', () => this.player.setVelocityX(220));
+                this.rightBtn.on('pointerup', () => this.player.setVelocityX(0));
+
+                this.jumpBtn.on('pointerdown', () => {
+                    if (this.player.body.blocked.down) {
+                        this.player.setVelocityY(-550);
+                        this.canDoubleJump = true;
+                    } else if (this.canDoubleJump) {
+                        this.player.setVelocityY(-800);
+                        this.canDoubleJump = false;
+                    }
+                });
+            }
         }
 
         collectFootball(player, football) {
@@ -149,19 +167,20 @@ window.addEventListener('load', function () {
         }
 
         update(time) {
-            // Links/Rechts
-            if (this.cursors.left.isDown) this.player.setVelocityX(-220);
-            else if (this.cursors.right.isDown) this.player.setVelocityX(220);
-            else this.player.setVelocityX(0);
+            // Desktop Steuerung
+            if (!this.sys.game.device.input.touch) {
+                if (this.cursors.left.isDown) this.player.setVelocityX(-220);
+                else if (this.cursors.right.isDown) this.player.setVelocityX(220);
+                else this.player.setVelocityX(0);
 
-            // Sprung-Logik
-            if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
-                if (this.player.body.blocked.down) {
-                    this.player.setVelocityY(-550);
-                    this.canDoubleJump = true;
-                } else if (this.canDoubleJump) {
-                    this.player.setVelocityY(-800);
-                    this.canDoubleJump = false;
+                if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
+                    if (this.player.body.blocked.down) {
+                        this.player.setVelocityY(-550);
+                        this.canDoubleJump = true;
+                    } else if (this.canDoubleJump) {
+                        this.player.setVelocityY(-800);
+                        this.canDoubleJump = false;
+                    }
                 }
             }
 
@@ -170,12 +189,12 @@ window.addEventListener('load', function () {
                 this.scene.start('NameScene');
             }
 
-            // Animation der Footballs (schweben)
+            // Football-Schwebebewegung
             this.footballs.children.iterate(f => {
                 f.y = f.baseY + Math.sin(time / 500 + f.angleOffset) * 10;
             });
 
-            // Quiz nur, wenn alle Footballs eingesammelt sind
+            // Quiz nur, wenn alle Footballs gesammelt
             if (this.player.x > 4750 && this.footballCount === this.footballsData.length) {
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
@@ -284,5 +303,3 @@ window.addEventListener('load', function () {
     });
 
 });
-
-
