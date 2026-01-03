@@ -7,19 +7,22 @@ window.addEventListener('load', function () {
         constructor() { super('NameScene'); }
 
         create() {
+            this.cameras.main.setScroll(0, 0);
+
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             this.add.text(220, 80, 'Gib deinen Namen ein:', {
                 font: '28px Arial',
                 fill: '#ffffff'
-            });
+            }).setScrollFactor(0);
 
             const input = this.add.dom(400, 170, 'input',
                 'width:300px;height:45px;font-size:20px;text-align:center;');
-            input.node.placeholder = 'Name';
+            input.setScrollFactor(0);
 
             const btn = this.add.dom(400, 240, 'button',
                 'width:140px;height:50px;font-size:20px;', 'Start');
+            btn.setScrollFactor(0);
 
             btn.addListener('click');
             btn.on('click', () => {
@@ -56,7 +59,6 @@ window.addEventListener('load', function () {
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
             const platforms = this.physics.add.staticGroup();
-
             platforms.create(worldWidth / 2, 430, 'platform')
                 .setScale(worldWidth / 400, 1)
                 .refreshBody();
@@ -96,7 +98,7 @@ window.addEventListener('load', function () {
     }
 
     // =====================
-    // QUIZ – STABIL
+    // QUIZ (FIXED)
     // =====================
     class QuizScene extends Phaser.Scene {
         constructor() { super('QuizScene'); }
@@ -104,44 +106,28 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         create() {
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
+            // 🔑 KAMERA RESET
+            this.cameras.main.stopFollow();
+            this.cameras.main.setScroll(0, 0);
+
+            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A).setScrollFactor(0);
 
             this.questions = [
-                {
-                    q: "Wie viele Spieler stehen pro Team auf dem Feld?",
-                    a: ["9", "10", "11"],
-                    c: 2
-                },
-                {
-                    q: "Wie heißt das NFL-Endspiel?",
-                    a: ["Super Bowl", "Final", "World Cup"],
-                    c: 0
-                },
-                {
-                    q: "Wie viele Punkte gibt ein Touchdown?",
-                    a: ["3", "6", "7"],
-                    c: 1
-                },
-                {
-                    q: "Welche Stadt ist bekannt für den Super Bowl?",
-                    a: ["Miami", "Berlin", "Paris"],
-                    c: 0
-                },
-                {
-                    q: "Wann ist die Party?",
-                    a: ["08.02.2026", "01.01.2026", "10.03.2026"],
-                    c: 0
-                }
+                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"] },
+                { q: "Wie heißt das NFL-Endspiel?", a: ["Super Bowl", "Final", "World Cup"] },
+                { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"] },
+                { q: "Welche Stadt ist bekannt für den Super Bowl?", a: ["Miami", "Berlin", "Paris"] },
+                { q: "Wann ist die Party?", a: ["08.02.2026", "01.01.2026", "10.03.2026"] }
             ];
 
             this.index = 0;
-            this.container = this.add.container();
+            this.ui = this.add.container(0, 0);
 
-            this.show();
+            this.showQuestion();
         }
 
-        show() {
-            this.container.removeAll(true);
+        showQuestion() {
+            this.ui.removeAll(true);
 
             if (this.index >= this.questions.length) {
                 this.scene.start('EndScene', { playerName: this.playerName });
@@ -154,9 +140,9 @@ window.addEventListener('load', function () {
                 font: '26px Arial',
                 fill: '#ffffff',
                 wordWrap: { width: 700 }
-            });
+            }).setScrollFactor(0);
 
-            this.container.add(title);
+            this.ui.add(title);
 
             q.a.forEach((opt, i) => {
                 const btn = this.add.text(100, 150 + i * 70, opt, {
@@ -164,14 +150,14 @@ window.addEventListener('load', function () {
                     backgroundColor: '#ffffff',
                     color: '#000',
                     padding: { x: 10, y: 10 }
-                }).setInteractive();
+                }).setInteractive().setScrollFactor(0);
 
                 btn.on('pointerdown', () => {
                     this.index++;
-                    this.show();
+                    this.showQuestion();
                 });
 
-                this.container.add(btn);
+                this.ui.add(btn);
             });
         }
     }
@@ -185,6 +171,9 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         create() {
+            this.cameras.main.stopFollow();
+            this.cameras.main.setScroll(0, 0);
+
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             this.add.text(120, 180,
