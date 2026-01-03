@@ -1,20 +1,42 @@
 window.addEventListener('load', function () {
 
-    // ---- Szene 1: Nameeingabe ----
+    // ---- Szene 1: Nameeingabe (Desktop + Mobile optimiert) ----
     class NameScene extends Phaser.Scene {
         constructor() { super('NameScene'); }
+
         create() {
+            // Ganzer Hintergrund
+            this.add.rectangle(400, 225, 800, 450, 0x1E90FF).setOrigin(0.5);
+
+            // Text
             this.add.text(250, 50, 'Gib deinen Namen ein:', { font: '28px Arial', fill: '#fff' });
-            
-            // HTML Input
-            const input = this.add.dom(400, 150, 'input', 'width: 200px; height: 30px; font-size:20px');
-            const btn = this.add.dom(400, 200, 'button', 'width:100px;height:40px;font-size:20px;', 'Weiter');
-            
+
+            // HTML Input-Feld
+            const input = this.add.dom(400, 150, 'input',
+                'width: 280px; height: 40px; font-size:20px; padding:5px; border: 2px solid #000; border-radius:5px; text-align:center;');
+            input.node.placeholder = "Dein Name";
+
+            // Button
+            const btn = this.add.dom(400, 220, 'button',
+                'width:120px;height:50px;font-size:20px;border-radius:5px; background-color:#28a745;color:#fff;', 'Weiter');
+
             btn.addListener('click');
             btn.on('click', () => {
                 const playerName = input.node.value || 'Spieler';
                 this.scene.start('PlayerSelectScene', { playerName });
             });
+
+            // ---- Mobile Optimierung ----
+            if (this.sys.game.device.input.touch) {
+                // Skalierung für kleinere Bildschirme
+                const scale = Math.min(window.innerWidth / 800, window.innerHeight / 450);
+                this.cameras.main.setZoom(scale);
+                this.cameras.main.centerOn(400, 225);
+
+                // Input und Button leicht nach unten verschieben
+                input.setPosition(400, 180);
+                btn.setPosition(400, 250);
+            }
         }
     }
 
@@ -142,6 +164,7 @@ window.addEventListener('load', function () {
         parent: 'game-container',
         backgroundColor: '#87CEEB',
         physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
+        dom: { createContainer: true }, // wichtig für HTML Input
         scene: [NameScene, PlayerSelectScene, GameScene, QuizScene, EndScene]
     };
 
