@@ -94,7 +94,7 @@ window.addEventListener('load', function () {
     }
 
     /* =====================
-       QUIZ
+       QUIZ – MUSS RICHTIG SEIN
     ===================== */
     class QuizScene extends Phaser.Scene {
         constructor() { super('QuizScene'); }
@@ -108,11 +108,13 @@ window.addEventListener('load', function () {
                 { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], correct: 2 },
                 { q: "Wie heißt das NFL-Endspiel?", a: ["Super Bowl", "Final", "World Cup"], correct: 0 },
                 { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"], correct: 1 },
-                { q: "Wo findet die beste Super Bowl Party statt?", a: ["Miami", "Elsbethen", "London"], correct: 1 },
+                { q: "Welche Stadt ist bekannt für den Super Bowl?", a: ["Miami", "Berlin", "Paris"], correct: 0 },
                 { q: "Wann ist die Party?", a: ["08.02.2026", "01.01.2026", "10.03.2026"], correct: 0 }
             ];
 
             this.index = 0;
+            this.feedbackText = null;
+
             this.showQuestion();
         }
 
@@ -120,11 +122,6 @@ window.addEventListener('load', function () {
             this.children.removeAll();
 
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A).setScrollFactor(0);
-
-            if (this.index >= this.questions.length) {
-                this.scene.start('EndScene', { playerName: this.playerName });
-                return;
-            }
 
             const q = this.questions[this.index];
 
@@ -142,23 +139,35 @@ window.addEventListener('load', function () {
                     padding: { x: 10, y: 10 }
                 }).setInteractive().setScrollFactor(0);
 
-                btn.on('pointerdown', () => this.showFeedback(i === q.correct));
+                btn.on('pointerdown', () => this.checkAnswer(i));
             });
         }
 
-        showFeedback(correct) {
-            const text = correct ? 'RICHTIG!' : 'FALSCH!';
-            const color = correct ? '#00ff00' : '#ff0000';
+        checkAnswer(choice) {
+            if (this.feedbackText) this.feedbackText.destroy();
 
-            this.add.text(330, 350, text, {
-                font: '32px Arial',
-                fill: color
-            }).setScrollFactor(0);
+            const correct = choice === this.questions[this.index].correct;
 
-            this.time.delayedCall(1000, () => {
-                this.index++;
-                this.showQuestion();
-            });
+            this.feedbackText = this.add.text(
+                240,
+                350,
+                correct ? 'RICHTIG!' : 'FALSCH – versuche es nochmal',
+                {
+                    font: '28px Arial',
+                    fill: correct ? '#00ff00' : '#ff0000'
+                }
+            ).setScrollFactor(0);
+
+            if (correct) {
+                this.time.delayedCall(1000, () => {
+                    this.index++;
+                    if (this.index >= this.questions.length) {
+                        this.scene.start('EndScene', { playerName: this.playerName });
+                    } else {
+                        this.showQuestion();
+                    }
+                });
+            }
         }
     }
 
