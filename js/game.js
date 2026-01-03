@@ -54,22 +54,23 @@ window.addEventListener('load', function () {
             ===================== */
             this.platforms = this.physics.add.staticGroup();
 
+            // Plattformen: x, y, scaleX
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },  // Startplattform
-                { x: 400, y: 260, scale: 1.2 },
-                { x: 650, y: 220, scale: 1.0 },
-                { x: 950, y: 260, scale: 1.3 },
-                { x: 1250, y: 200, scale: 1.0 },
-                { x: 1550, y: 260, scale: 1.4 },
-                { x: 1850, y: 220, scale: 1.1 },
-                { x: 2150, y: 260, scale: 1.3 },
-                { x: 2450, y: 200, scale: 1.2 },
-                { x: 2750, y: 260, scale: 1.5 },
-                { x: 3050, y: 220, scale: 1.2 },
-                { x: 3350, y: 260, scale: 1.3 },
-                { x: 3650, y: 200, scale: 1.0 },
-                { x: 3950, y: 260, scale: 1.4 },
-                { x: 4250, y: 220, scale: 1.2 }
+                { x: 350, y: 250, scale: 1.2 },
+                { x: 550, y: 200, scale: 1.0 },
+                { x: 750, y: 250, scale: 1.2 },
+                { x: 950, y: 200, scale: 1.0 },
+                { x: 1150, y: 250, scale: 1.2 },
+                { x: 1350, y: 200, scale: 1.0 },
+                { x: 1550, y: 250, scale: 1.3 },
+                { x: 1750, y: 200, scale: 1.0 },
+                { x: 1950, y: 250, scale: 1.3 },
+                { x: 2150, y: 200, scale: 1.0 },
+                { x: 2350, y: 250, scale: 1.3 },
+                { x: 2550, y: 200, scale: 1.0 },
+                { x: 2750, y: 250, scale: 1.3 },
+                { x: 2950, y: 200, scale: 1.0 }
             ];
 
             platformsData.forEach(p => {
@@ -84,15 +85,17 @@ window.addEventListener('load', function () {
             this.player = this.physics.add.sprite(startPlatform.x, startPlatform.y - 50, 'player');
             this.player.setCollideWorldBounds(false);
             this.player.setGravityY(900);
-            this.player.setBounce(0);  // kein Abprallen
+            this.player.setBounce(0);
             this.player.body.setSize(this.player.width, this.player.height, true);
 
-            this.physics.add.collider(this.player, this.platforms);
-
-            this.cursors = this.input.keyboard.createCursorKeys();
-            this.lastJump = 0;
+            this.physics.add.collider(this.player, this.platforms, () => {
+                this.canDoubleJump = true; // Reset Doppelsprung beim Landen
+            });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+
+            this.cursors = this.input.keyboard.createCursorKeys();
+            this.canDoubleJump = true;
         }
 
         update() {
@@ -101,12 +104,15 @@ window.addEventListener('load', function () {
             else if (this.cursors.right.isDown) this.player.setVelocityX(220);
             else this.player.setVelocityX(0);
 
-            // Sprung
-            if (this.cursors.up.isDown && this.player.body.blocked.down) {
-                const now = this.time.now;
-                // Doppel-Sprung bei kurzem Abstand
-                this.player.setVelocityY((now - this.lastJump < 300) ? -1100 : -550);
-                this.lastJump = now;
+            // Sprung-Logik
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
+                if (this.player.body.blocked.down) {
+                    this.player.setVelocityY(-550); // Normaler Sprung
+                    this.canDoubleJump = true;
+                } else if (this.canDoubleJump) {
+                    this.player.setVelocityY(-800); // Doppelsprung
+                    this.canDoubleJump = false;
+                }
             }
 
             // Tod, wenn Spieler unter Canvas fällt
