@@ -39,7 +39,7 @@ window.addEventListener('load', function () {
         preload() {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
-            this.load.image('coin', 'assets/sprites/ball.png'); // Münzen
+            this.load.image('coin', 'assets/sprites/ball.png');
         }
 
         create() {
@@ -57,7 +57,7 @@ window.addEventListener('load', function () {
             this.platforms = this.physics.add.staticGroup();
 
             const platformsData = [
-                { x: 150, y: 300, scale: 1.5 },  // Startplattform
+                { x: 150, y: 300, scale: 1.5 },
                 { x: 350, y: 250, scale: 1.2 },
                 { x: 550, y: 200, scale: 1.0 },
                 { x: 750, y: 250, scale: 1.2 },
@@ -72,8 +72,6 @@ window.addEventListener('load', function () {
                 { x: 2550, y: 200, scale: 1.0 },
                 { x: 2750, y: 250, scale: 1.3 },
                 { x: 2950, y: 200, scale: 1.0 },
-
-                // Plattformen bis kurz vor Quiz
                 { x: 3200, y: 250, scale: 1.3 },
                 { x: 3500, y: 220, scale: 1.0 },
                 { x: 3800, y: 250, scale: 1.2 },
@@ -98,7 +96,7 @@ window.addEventListener('load', function () {
             this.player.body.setSize(this.player.width, this.player.height, true);
 
             this.physics.add.collider(this.player, this.platforms, () => {
-                this.canDoubleJump = true; // Reset Doppelsprung beim Landen
+                this.canDoubleJump = true;
             });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
@@ -112,23 +110,21 @@ window.addEventListener('load', function () {
             this.coins = this.physics.add.group();
             this.coinCount = 0;
 
-            // Beispiel: Münzen auf einigen Plattformen
+            // Münzen nur auf bestimmten Sprungstrecken in der Luft
             const coinsData = [
-                { x: 350, y: 200 },
-                { x: 550, y: 150 },
-                { x: 750, y: 200 },
+                { x: 250, y: 200 },
+                { x: 600, y: 150 },
                 { x: 950, y: 150 },
-                { x: 1150, y: 200 },
                 { x: 1350, y: 150 },
-                { x: 1550, y: 200 },
                 { x: 1750, y: 150 },
-                { x: 1950, y: 200 },
-                { x: 2150, y: 150 }
+                { x: 2150, y: 150 },
+                { x: 3800, y: 200 },
+                { x: 4400, y: 180 }
             ];
 
             coinsData.forEach(c => {
                 const coin = this.coins.create(c.x, c.y, 'coin');
-                coin.setScale(0.5);
+                coin.setScale(0.25); // stark verkleinert
                 coin.body.setAllowGravity(false);
             });
 
@@ -156,10 +152,10 @@ window.addEventListener('load', function () {
             // Sprung-Logik
             if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 if (this.player.body.blocked.down) {
-                    this.player.setVelocityY(-550); // Normaler Sprung
+                    this.player.setVelocityY(-550);
                     this.canDoubleJump = true;
                 } else if (this.canDoubleJump) {
-                    this.player.setVelocityY(-800); // Doppelsprung
+                    this.player.setVelocityY(-800);
                     this.canDoubleJump = false;
                 }
             }
