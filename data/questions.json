@@ -1,9 +1,7 @@
 [
- { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], correct: 2 },
-                { q: "Wer gewann den allerersten SuperBowl?", a: ["Dallas Cowboys", "Green Bay Packers", "New England Patriots"], correct: 1 },
-                { q: "Wie viele Punkte gibt es für einen Touchdown?", a: ["3", "6", "7"], correct: 1 },
-                { q: "Welches dieser Teams hat noch nie einen Super Bowl gewonnen?", a: ["Minnesota Vikings", "Denver Broncos", "New England Patriots"], correct: 0 },
-                { q: "Wo feierst du heuer den SuperBowl?", a: ["Alleine zuhause", "San Francisco", "Elsbethen"], correct: 2 }
-
+  {"q":"Wie viele Spieler sind pro Team am Feld?","a":["9","11","13"],"c":1},
+  {"q":"Wer gewann den allerersten SuperBowl?","a":["Dallas Cowboys", "Green Bay Packers", "New England Patriots"],"c":1},
+  {"q":"Wie heißt das Finale?","a":["World Bowl","Super Bowl","Final Game"],"c":1},
+  {"q":"Welches dieser Teams hat noch nie einen Super Bowl gewonnen?","a":["Minnesota Vikings", "Denver Broncos", "New England Patriots"],"c":0},
+  {"q":"Wo feierst du heuer den SuperBowl?","a":["Alleine zuhause", "San Francisco", "Elsbethen"],"c":2}
 ]
-
