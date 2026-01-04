@@ -203,8 +203,10 @@ window.addEventListener('load', function () {
             this.index = 0;
             this.questions = [
                 { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], c: 2 },
-                { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"], c: 1 },
-                { q: "Wo findet die Party statt?", a: ["Salzburg", "Elsbethen", "Wien"], c: 1 }
+                { q: "Wer gewann den allerersten SuperBowl?", a: ["Dallas Cowboys", "Green Bay Packers", "New England Patriots"], c: 1 },
+                { q: "Wie viele Punkte gibt es für einen Touchdown?", a: ["3", "6", "7"], c: 1 },
+                { q: "Welches dieser Teams hat noch nie einen Super Bowl gewonnen?", a: ["Minnesota Vikings", "Denver Broncos", "New England Patriots"], c: 0 },
+                { q: "Wo feierst du heuer den SuperBowl?", a: ["Alleine zuhause", "San Francisco", "Elsbethen"], c: 2 }
             ];
             this.feedback = null;
             this.showQuestion();
@@ -253,7 +255,7 @@ window.addEventListener('load', function () {
         create() {
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
             this.add.text(120, 180,
-                `Glückwunsch ${this.playerName}!\n\nSUPER BOWL PARTY\n08.02.2026\nElsbethen`,
+                `Glückwunsch ${this.playerName}!\n\n Du bist herzlich eingeladen zur \nSUPER BOWL PARTY\n am 08.02.2026\n in Elsbethen`,
                 { font: '28px Arial', fill: '#ffffff', align: 'center' }
             );
         }
@@ -270,3 +272,4 @@ window.addEventListener('load', function () {
     });
 
 });
+
