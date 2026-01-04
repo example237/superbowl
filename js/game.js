@@ -8,15 +8,18 @@ window.addEventListener('load', function () {
 
         create(data) {
             this.playerName = data?.playerName || null;
+
             this.cameras.main.setScroll(0, 0);
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             this.add.text(220, 80, 'Gib deinen Namen ein:', {
-                font: '28px Arial', fill: '#ffffff'
+                font: '28px Arial',
+                fill: '#ffffff'
             });
 
             const input = this.add.dom(400, 170, 'input',
                 'width:300px;height:45px;font-size:20px;text-align:center;');
+
             if (this.playerName) input.node.value = this.playerName;
 
             const btn = this.add.dom(400, 240, 'button',
@@ -49,37 +52,43 @@ window.addEventListener('load', function () {
 
         create() {
             const worldWidth = 5000;
-            const gameHeight = 450;
 
-            this.physics.world.setBounds(0, 0, worldWidth, gameHeight);
-            this.cameras.main.setBounds(0, 0, worldWidth, gameHeight);
+            this.physics.world.setBounds(0, 0, worldWidth, 450);
+            this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
-            this.add.rectangle(worldWidth/2, gameHeight/2, worldWidth, gameHeight, 0x87CEEB);
+            // Hintergrund
+            this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
+            // -------------------
             // Plattformen
+            // -------------------
             this.platforms = this.physics.add.staticGroup();
+            // Alle Abstände jetzt erreichbar
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },
-                { x: 350, y: 260, scale: 1.2 },
-                { x: 550, y: 220, scale: 1.0 },
-                { x: 750, y: 250, scale: 1.2 },
-                { x: 950, y: 210, scale: 1.0 },
-                { x: 1150, y: 250, scale: 1.2 },
-                { x: 1350, y: 220, scale: 1.0 },
-                { x: 1550, y: 250, scale: 1.3 },
-                { x: 1750, y: 220, scale: 1.0 },
-                { x: 1950, y: 250, scale: 1.3 },
-                { x: 2150, y: 220, scale: 1.0 },
-                { x: 2350, y: 250, scale: 1.3 },
-                { x: 2550, y: 220, scale: 1.0 },
-                { x: 2750, y: 250, scale: 1.3 },
-                { x: 2950, y: 220, scale: 1.0 },
-                { x: 3200, y: 250, scale: 1.3 },
-                { x: 3500, y: 220, scale: 1.0 },
-                { x: 3800, y: 250, scale: 1.2 },
-                { x: 4100, y: 220, scale: 1.0 },
-                { x: 4400, y: 250, scale: 1.3 },
-                { x: 4700, y: 220, scale: 1.0 }
+                { x: 320, y: 260, scale: 1.2 },
+                { x: 490, y: 220, scale: 1.0 },
+                { x: 660, y: 250, scale: 1.2 },
+                { x: 830, y: 210, scale: 1.0 },
+                { x: 1000, y: 250, scale: 1.2 },
+                { x: 1170, y: 220, scale: 1.0 },
+                { x: 1340, y: 250, scale: 1.3 },
+                { x: 1510, y: 220, scale: 1.0 },
+                { x: 1680, y: 250, scale: 1.3 },
+                { x: 1850, y: 220, scale: 1.0 },
+                { x: 2020, y: 250, scale: 1.3 },
+                { x: 2190, y: 220, scale: 1.0 },
+                { x: 2360, y: 250, scale: 1.3 },
+                { x: 2530, y: 220, scale: 1.0 },
+                { x: 2700, y: 250, scale: 1.3 },
+                { x: 2870, y: 220, scale: 1.0 },
+                { x: 3040, y: 250, scale: 1.2 },
+                { x: 3210, y: 220, scale: 1.0 },
+                { x: 3380, y: 250, scale: 1.3 },
+                { x: 3550, y: 220, scale: 1.0 },
+                { x: 3720, y: 250, scale: 1.2 },
+                { x: 3890, y: 220, scale: 1.0 },
+                { x: 4060, y: 250, scale: 1.3 }
             ];
 
             platformsData.forEach(p => {
@@ -92,14 +101,24 @@ window.addEventListener('load', function () {
             this.goalPlatform.setScale(1.8, 1.2).refreshBody();
             this.goalPlatform.setTint(0xffd700);
             this.goalText = this.add.text(4700, 150, 'ZIEL', {
-                font: '24px Arial', fill: '#ffd700', stroke: '#000', strokeThickness: 4
+                font: '24px Arial',
+                fill: '#ffd700',
+                stroke: '#000',
+                strokeThickness: 4
             }).setOrigin(0.5);
 
             this.tweens.add({
-                targets: this.goalPlatform, scaleX: 2.0, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+                targets: this.goalPlatform,
+                scaleX: 2.0,
+                duration: 800,
+                yoyo: true,
+                repeat: -1,
+                ease: 'Sine.easeInOut'
             });
 
+            // -------------------
             // Spieler
+            // -------------------
             const startPlatform = platformsData[0];
             this.player = this.physics.add.sprite(startPlatform.x, startPlatform.y - 50, 'player');
             this.player.setCollideWorldBounds(false);
@@ -107,13 +126,17 @@ window.addEventListener('load', function () {
             this.player.setBounce(0);
             this.player.body.setSize(this.player.width, this.player.height, true);
 
-            this.physics.add.collider(this.player, this.platforms, () => { this.canDoubleJump = true; });
+            this.physics.add.collider(this.player, this.platforms, () => {
+                this.canDoubleJump = true;
+            });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
             this.cursors = this.input.keyboard.createCursorKeys();
             this.canDoubleJump = true;
 
+            // -------------------
             // Footballs
+            // -------------------
             this.footballs = this.physics.add.group();
             this.footballCount = 0;
 
@@ -136,21 +159,26 @@ window.addEventListener('load', function () {
             this.physics.add.overlap(this.player, this.footballs, this.collectFootball, null, this);
 
             this.footballText = this.add.text(10, 10, 'Football: 0', {
-                font: '24px Arial', fill: '#ffffff'
+                font: '24px Arial',
+                fill: '#ffffff'
             }).setScrollFactor(0);
 
+            // -------------------
             // Musik
+            // -------------------
             if (!this.sound.get('bgm')) {
                 this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
                 this.bgm.play();
             }
 
+            // -------------------
             // Mobile Buttons
+            // -------------------
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
             if (isMobile) {
-                this.leftBtn = this.add.image(120, 370, 'btn_left').setInteractive().setScrollFactor(0).setScale(2);
-                this.rightBtn = this.add.image(300, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(2);
-                this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(2);
+                this.leftBtn = this.add.image(100, 370, 'btn_left').setInteractive().setScrollFactor(0).setScale(1.3);
+                this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.3);
+                this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.3);
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
@@ -184,7 +212,9 @@ window.addEventListener('load', function () {
                 }
             }
 
-            if (this.player.y > 450) this.scene.restart({ playerName: this.playerName });
+            if (this.player.y > 450) {
+                this.scene.restart({ playerName: this.playerName });
+            }
 
             this.footballs.children.iterate(f => {
                 f.y = f.baseY + Math.sin(time / 500 + f.angleOffset) * 10;
@@ -221,7 +251,9 @@ window.addEventListener('load', function () {
             this.children.removeAll();
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
             const q = this.questions[this.index];
+
             this.add.text(50, 50, q.q, { font: '26px Arial', fill: '#ffffff', wordWrap: { width: 700 } });
+
             q.a.forEach((opt, i) => {
                 const btn = this.add.text(100, 150 + i * 70, opt, {
                     font: '24px Arial', backgroundColor: '#ffffff', color: '#000', padding: { x: 10, y: 10 }
