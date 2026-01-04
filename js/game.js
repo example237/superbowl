@@ -1,5 +1,8 @@
 window.addEventListener('load', function () {
 
+    const gameWidth = window.innerWidth;  // Dynamische Breite
+    const gameHeight = 450;
+
     /* =====================
        NAME
     ===================== */
@@ -10,19 +13,19 @@ window.addEventListener('load', function () {
             this.playerName = data?.playerName || null;
 
             this.cameras.main.setScroll(0, 0);
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
+            this.add.rectangle(gameWidth/2, gameHeight/2, gameWidth, gameHeight, 0x1E3A8A);
 
-            this.add.text(220, 80, 'Gib deinen Namen ein:', {
+            this.add.text(gameWidth/2 - 180, 80, 'Gib deinen Namen ein:', {
                 font: '28px Arial',
                 fill: '#ffffff'
             });
 
-            const input = this.add.dom(400, 170, 'input',
+            const input = this.add.dom(gameWidth/2, 170, 'input',
                 'width:300px;height:45px;font-size:20px;text-align:center;');
 
             if (this.playerName) input.node.value = this.playerName;
 
-            const btn = this.add.dom(400, 240, 'button',
+            const btn = this.add.dom(gameWidth/2, 240, 'button',
                 'width:180px;height:60px;font-size:22px;', 'Start');
 
             btn.addListener('click');
@@ -52,18 +55,16 @@ window.addEventListener('load', function () {
 
         create() {
             const worldWidth = 5000;
-
-            this.physics.world.setBounds(0, 0, worldWidth, 450);
-            this.cameras.main.setBounds(0, 0, worldWidth, 450);
+            this.physics.world.setBounds(0, 0, worldWidth, gameHeight);
+            this.cameras.main.setBounds(0, 0, worldWidth, gameHeight);
 
             // Hintergrund
-            this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
+            this.add.rectangle(worldWidth/2, gameHeight/2, worldWidth, gameHeight, 0x87CEEB);
 
             // -------------------
             // Plattformen
             // -------------------
             this.platforms = this.physics.add.staticGroup();
-            // Alle Abstände jetzt erreichbar
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },
                 { x: 320, y: 260, scale: 1.2 },
@@ -126,9 +127,7 @@ window.addEventListener('load', function () {
             this.player.setBounce(0);
             this.player.body.setSize(this.player.width, this.player.height, true);
 
-            this.physics.add.collider(this.player, this.platforms, () => {
-                this.canDoubleJump = true;
-            });
+            this.physics.add.collider(this.player, this.platforms, () => { this.canDoubleJump = true; });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
             this.cursors = this.input.keyboard.createCursorKeys();
@@ -176,9 +175,9 @@ window.addEventListener('load', function () {
             // -------------------
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
             if (isMobile) {
-                this.leftBtn = this.add.image(100, 370, 'btn_left').setInteractive().setScrollFactor(0).setScale(1.3);
-                this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.3);
-                this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.3);
+                this.leftBtn = this.add.image(100, gameHeight - 80, 'btn_left').setInteractive().setScrollFactor(0).setScale(1.5);
+                this.rightBtn = this.add.image(260, gameHeight - 80, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.5);
+                this.jumpBtn = this.add.image(gameWidth - 100, gameHeight - 80, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.5);
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
@@ -212,7 +211,7 @@ window.addEventListener('load', function () {
                 }
             }
 
-            if (this.player.y > 450) {
+            if (this.player.y > gameHeight) {
                 this.scene.restart({ playerName: this.playerName });
             }
 
@@ -249,11 +248,9 @@ window.addEventListener('load', function () {
 
         showQuestion() {
             this.children.removeAll();
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
+            this.add.rectangle(gameWidth/2, gameHeight/2, gameWidth, gameHeight, 0x1E3A8A);
             const q = this.questions[this.index];
-
             this.add.text(50, 50, q.q, { font: '26px Arial', fill: '#ffffff', wordWrap: { width: 700 } });
-
             q.a.forEach((opt, i) => {
                 const btn = this.add.text(100, 150 + i * 70, opt, {
                     font: '24px Arial', backgroundColor: '#ffffff', color: '#000', padding: { x: 10, y: 10 }
@@ -287,7 +284,7 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         create() {
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
+            this.add.rectangle(gameWidth/2, gameHeight/2, gameWidth, gameHeight, 0x1E3A8A);
             this.add.text(120, 180,
                 `Glückwunsch ${this.playerName}!\n\nDu bist herzlich eingeladen zur\n SUPER BOWL PARTY\n am 08.02.2026\n in Elsbethen!`,
                 { font: '28px Arial', fill: '#ffffff', align: 'center' }
@@ -300,8 +297,8 @@ window.addEventListener('load', function () {
     ===================== */
     new Phaser.Game({
         type: Phaser.AUTO,
-        width: 800,
-        height: 450,
+        width: gameWidth,
+        height: gameHeight,
         parent: 'game-container',
         physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
         dom: { createContainer: true },
