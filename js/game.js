@@ -63,27 +63,32 @@ window.addEventListener('load', function () {
             // Plattformen
             // -------------------
             this.platforms = this.physics.add.staticGroup();
+            // Alle Abstände jetzt erreichbar
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },
-                { x: 350, y: 250, scale: 1.2 },
-                { x: 550, y: 200, scale: 1.0 },
-                { x: 750, y: 250, scale: 1.2 },
-                { x: 950, y: 200, scale: 1.0 },
-                { x: 1150, y: 250, scale: 1.2 },
-                { x: 1350, y: 200, scale: 1.0 },
-                { x: 1550, y: 250, scale: 1.3 },
-                { x: 1750, y: 200, scale: 1.0 },
-                { x: 1950, y: 250, scale: 1.3 },
-                { x: 2150, y: 200, scale: 1.0 },
-                { x: 2350, y: 250, scale: 1.3 },
-                { x: 2550, y: 200, scale: 1.0 },
-                { x: 2750, y: 250, scale: 1.3 },
-                { x: 2950, y: 200, scale: 1.0 },
-                { x: 3200, y: 250, scale: 1.3 },
-                { x: 3500, y: 220, scale: 1.0 },
-                { x: 3800, y: 250, scale: 1.2 },
-                { x: 4100, y: 220, scale: 1.0 },
-                { x: 4400, y: 250, scale: 1.3 }
+                { x: 320, y: 260, scale: 1.2 },
+                { x: 490, y: 220, scale: 1.0 },
+                { x: 660, y: 250, scale: 1.2 },
+                { x: 830, y: 210, scale: 1.0 },
+                { x: 1000, y: 250, scale: 1.2 },
+                { x: 1170, y: 220, scale: 1.0 },
+                { x: 1340, y: 250, scale: 1.3 },
+                { x: 1510, y: 220, scale: 1.0 },
+                { x: 1680, y: 250, scale: 1.3 },
+                { x: 1850, y: 220, scale: 1.0 },
+                { x: 2020, y: 250, scale: 1.3 },
+                { x: 2190, y: 220, scale: 1.0 },
+                { x: 2360, y: 250, scale: 1.3 },
+                { x: 2530, y: 220, scale: 1.0 },
+                { x: 2700, y: 250, scale: 1.3 },
+                { x: 2870, y: 220, scale: 1.0 },
+                { x: 3040, y: 250, scale: 1.2 },
+                { x: 3210, y: 220, scale: 1.0 },
+                { x: 3380, y: 250, scale: 1.3 },
+                { x: 3550, y: 220, scale: 1.0 },
+                { x: 3720, y: 250, scale: 1.2 },
+                { x: 3890, y: 220, scale: 1.0 },
+                { x: 4060, y: 250, scale: 1.3 }
             ];
 
             platformsData.forEach(p => {
@@ -91,13 +96,10 @@ window.addEventListener('load', function () {
                 plat.setScale(p.scale, 1).refreshBody();
             });
 
-            // -------------------
             // Zielplattform
-            // -------------------
             this.goalPlatform = this.platforms.create(4700, 220, 'platform');
             this.goalPlatform.setScale(1.8, 1.2).refreshBody();
             this.goalPlatform.setTint(0xffd700);
-
             this.goalText = this.add.text(4700, 150, 'ZIEL', {
                 font: '24px Arial',
                 fill: '#ffd700',
@@ -162,7 +164,7 @@ window.addEventListener('load', function () {
             }).setScrollFactor(0);
 
             // -------------------
-            // Hintergrundmusik
+            // Musik
             // -------------------
             if (!this.sound.get('bgm')) {
                 this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
@@ -174,20 +176,17 @@ window.addEventListener('load', function () {
             // -------------------
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
             if (isMobile) {
-                this.leftBtn = this.add.image(100, 370, 'btn_left').setInteractive().setScrollFactor(0).setScale(1.0);
-                this.rightBtn = this.add.image(220, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.0);
-                this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.0);
+                this.leftBtn = this.add.image(100, 370, 'btn_left').setInteractive().setScrollFactor(0).setScale(1.3);
+                this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.3);
+                this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.3);
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
                 this.rightBtn.on('pointerdown', () => this.player.setVelocityX(220));
                 this.rightBtn.on('pointerup', () => this.player.setVelocityX(0));
                 this.jumpBtn.on('pointerdown', () => {
-                    if (this.player.body.blocked.down) {
-                        this.player.setVelocityY(-550); this.canDoubleJump = true;
-                    } else if (this.canDoubleJump) {
-                        this.player.setVelocityY(-800); this.canDoubleJump = false;
-                    }
+                    if (this.player.body.blocked.down) { this.player.setVelocityY(-550); this.canDoubleJump = true; }
+                    else if (this.canDoubleJump) { this.player.setVelocityY(-800); this.canDoubleJump = false; }
                     if (navigator.vibrate) navigator.vibrate(50);
                 });
             }
@@ -208,11 +207,8 @@ window.addEventListener('load', function () {
                 else this.player.setVelocityX(0);
 
                 if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
-                    if (this.player.body.blocked.down) {
-                        this.player.setVelocityY(-550); this.canDoubleJump = true;
-                    } else if (this.canDoubleJump) {
-                        this.player.setVelocityY(-800); this.canDoubleJump = false;
-                    }
+                    if (this.player.body.blocked.down) { this.player.setVelocityY(-550); this.canDoubleJump = true; }
+                    else if (this.canDoubleJump) { this.player.setVelocityY(-800); this.canDoubleJump = false; }
                 }
             }
 
