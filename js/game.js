@@ -52,13 +52,11 @@ window.addEventListener('load', function () {
 
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
-
             this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
             /* PLATTFORMEN */
             this.platforms = this.physics.add.staticGroup();
-
-            this.platformsData = [
+            this.platformData = [
                 { x: 150, y: 300 }, { x: 350, y: 250 }, { x: 550, y: 200 },
                 { x: 750, y: 250 }, { x: 950, y: 200 }, { x: 1150, y: 250 },
                 { x: 1350, y: 200 }, { x: 1550, y: 250 }, { x: 1750, y: 200 },
@@ -68,37 +66,35 @@ window.addEventListener('load', function () {
                 { x: 4100, y: 220 }, { x: 4400, y: 250 }, { x: 4700, y: 220 }
             ];
 
-            this.platformsData.forEach(p => {
+            this.platformData.forEach(p => {
                 this.platforms.create(p.x, p.y, 'platform').refreshBody();
             });
 
-            /* SPIELER – IMMER ERSTE PLATTFORM */
-            const start = this.platformsData[0];
+            /* SPIELER */
+            const start = this.platformData[0];
             this.player = this.physics.add.sprite(start.x, start.y - 50, 'player');
             this.player.setGravityY(900);
             this.player.setCollideWorldBounds(false);
 
             this.canDoubleJump = true;
-
             this.physics.add.collider(this.player, this.platforms, () => {
                 this.canDoubleJump = true;
             });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-
             this.cursors = this.input.keyboard.createCursorKeys();
 
             /* FOOTBALLS */
             this.footballs = this.physics.add.group();
             this.footballCount = 0;
 
-            const footballsData = [
+            const footballData = [
                 { x: 250, y: 180 }, { x: 800, y: 200 },
                 { x: 1500, y: 160 }, { x: 2300, y: 180 },
                 { x: 3200, y: 180 }, { x: 4400, y: 180 }
             ];
 
-            footballsData.forEach(f => {
+            footballData.forEach(f => {
                 const ball = this.footballs.create(f.x, f.y, 'football');
                 ball.setScale(0.25);
                 ball.body.setAllowGravity(false);
@@ -113,25 +109,18 @@ window.addEventListener('load', function () {
                 fill: '#ffffff'
             }).setScrollFactor(0);
 
-            /* MOBILE BUTTONS – EXTRA GROSS */
+            /* MOBILE BUTTONS */
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
 
             if (isMobile) {
-                this.leftBtn = this.add.image(140, 360, 'btn_left')
-                    .setScale(1.2).setScrollFactor(0).setInteractive();
-
-                this.rightBtn = this.add.image(300, 360, 'btn_right')
-                    .setScale(1.2).setScrollFactor(0).setInteractive();
-
-                this.jumpBtn = this.add.image(660, 360, 'btn_jump')
-                    .setScale(1.2).setScrollFactor(0).setInteractive();
+                this.leftBtn = this.add.image(140, 360, 'btn_left').setScale(1.2).setScrollFactor(0).setInteractive();
+                this.rightBtn = this.add.image(300, 360, 'btn_right').setScale(1.2).setScrollFactor(0).setInteractive();
+                this.jumpBtn = this.add.image(660, 360, 'btn_jump').setScale(1.2).setScrollFactor(0).setInteractive();
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
-
                 this.rightBtn.on('pointerdown', () => this.player.setVelocityX(220));
                 this.rightBtn.on('pointerup', () => this.player.setVelocityX(0));
-
                 this.jumpBtn.on('pointerdown', () => this.jump());
             }
         }
@@ -157,11 +146,8 @@ window.addEventListener('load', function () {
             else if (this.cursors.right.isDown) this.player.setVelocityX(220);
             else this.player.setVelocityX(0);
 
-            if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
-                this.jump();
-            }
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) this.jump();
 
-            // TOD → Neustart, Name bleibt
             if (this.player.y > 450) {
                 this.scene.restart({ playerName: this.playerName });
             }
@@ -185,16 +171,54 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         create() {
+            this.index = 0;
+            this.questions = [
+                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], c: 2 },
+                { q: "Wie heißt das NFL-Finale?", a: ["Super Bowl", "World Cup", "Final"], c: 0 },
+                { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"], c: 1 }
+            ];
+
+            this.showQuestion();
+        }
+
+        showQuestion() {
+            this.children.removeAll();
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
-            this.add.text(150, 200,
-                `Gut gemacht ${this.playerName}!\n\nQuiz folgt hier…`,
-                { font: '28px Arial', fill: '#ffffff', align: 'center' }
-            );
+            const q = this.questions[this.index];
 
-            this.input.once('pointerdown', () => {
-                this.scene.start('EndScene', { playerName: this.playerName });
+            this.add.text(50, 50, q.q, {
+                font: '26px Arial',
+                fill: '#ffffff',
+                wordWrap: { width: 700 }
             });
+
+            q.a.forEach((opt, i) => {
+                const btn = this.add.text(100, 150 + i * 70, opt, {
+                    font: '24px Arial',
+                    backgroundColor: '#ffffff',
+                    color: '#000',
+                    padding: { x: 10, y: 10 }
+                }).setInteractive();
+
+                btn.on('pointerdown', () => this.checkAnswer(i));
+            });
+        }
+
+        checkAnswer(choice) {
+            if (choice === this.questions[this.index].c) {
+                this.index++;
+                if (this.index >= this.questions.length) {
+                    this.scene.start('EndScene', { playerName: this.playerName });
+                } else {
+                    this.showQuestion();
+                }
+            } else {
+                this.add.text(260, 360, 'Falsch – versuche es nochmal', {
+                    font: '26px Arial',
+                    fill: '#ff0000'
+                });
+            }
         }
     }
 
@@ -208,7 +232,6 @@ window.addEventListener('load', function () {
 
         create() {
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-
             this.add.text(120, 180,
                 `Glückwunsch ${this.playerName}!\n\nSUPER BOWL PARTY\n08.02.2026`,
                 { font: '28px Arial', fill: '#ffffff', align: 'center' }
@@ -224,15 +247,9 @@ window.addEventListener('load', function () {
         width: 800,
         height: 450,
         parent: 'game-container',
-        physics: {
-            default: 'arcade',
-            arcade: { gravity: { y: 900 } }
-        },
+        physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
         dom: { createContainer: true },
-        scale: {
-            mode: Phaser.Scale.FIT,
-            autoCenter: Phaser.Scale.CENTER_BOTH
-        },
+        scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
         scene: [NameScene, GameScene, QuizScene, EndScene]
     });
 
