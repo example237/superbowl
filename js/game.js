@@ -1,8 +1,5 @@
 window.addEventListener('load', function () {
 
-    let gameWidth = window.innerWidth;
-    let gameHeight = 450;
-
     /* =====================
        NAME
     ===================== */
@@ -12,17 +9,17 @@ window.addEventListener('load', function () {
         create(data) {
             this.playerName = data?.playerName || null;
             this.cameras.main.setScroll(0, 0);
-            this.add.rectangle(gameWidth/2, gameHeight/2, gameWidth, gameHeight, 0x1E3A8A);
+            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
-            this.add.text(gameWidth/2 - 180, 80, 'Gib deinen Namen ein:', {
+            this.add.text(220, 80, 'Gib deinen Namen ein:', {
                 font: '28px Arial', fill: '#ffffff'
             });
 
-            const input = this.add.dom(gameWidth/2, 170, 'input',
+            const input = this.add.dom(400, 170, 'input',
                 'width:300px;height:45px;font-size:20px;text-align:center;');
             if (this.playerName) input.node.value = this.playerName;
 
-            const btn = this.add.dom(gameWidth/2, 240, 'button',
+            const btn = this.add.dom(400, 240, 'button',
                 'width:180px;height:60px;font-size:22px;', 'Start');
 
             btn.addListener('click');
@@ -52,14 +49,14 @@ window.addEventListener('load', function () {
 
         create() {
             const worldWidth = 5000;
+            const gameHeight = 450;
+
             this.physics.world.setBounds(0, 0, worldWidth, gameHeight);
             this.cameras.main.setBounds(0, 0, worldWidth, gameHeight);
 
             this.add.rectangle(worldWidth/2, gameHeight/2, worldWidth, gameHeight, 0x87CEEB);
 
-            // -------------------
             // Plattformen
-            // -------------------
             this.platforms = this.physics.add.staticGroup();
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },
@@ -102,9 +99,7 @@ window.addEventListener('load', function () {
                 targets: this.goalPlatform, scaleX: 2.0, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
             });
 
-            // -------------------
             // Spieler
-            // -------------------
             const startPlatform = platformsData[0];
             this.player = this.physics.add.sprite(startPlatform.x, startPlatform.y - 50, 'player');
             this.player.setCollideWorldBounds(false);
@@ -118,9 +113,7 @@ window.addEventListener('load', function () {
             this.cursors = this.input.keyboard.createCursorKeys();
             this.canDoubleJump = true;
 
-            // -------------------
             // Footballs
-            // -------------------
             this.footballs = this.physics.add.group();
             this.footballCount = 0;
 
@@ -146,22 +139,18 @@ window.addEventListener('load', function () {
                 font: '24px Arial', fill: '#ffffff'
             }).setScrollFactor(0);
 
-            // -------------------
             // Musik
-            // -------------------
             if (!this.sound.get('bgm')) {
                 this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
                 this.bgm.play();
             }
 
-            // -------------------
             // Mobile Buttons
-            // -------------------
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
             if (isMobile) {
-                this.leftBtn = this.add.image(120, gameHeight - 80, 'btn_left').setInteractive().setScrollFactor(0).setScale(2);
-                this.rightBtn = this.add.image(300, gameHeight - 80, 'btn_right').setInteractive().setScrollFactor(0).setScale(2);
-                this.jumpBtn = this.add.image(gameWidth - 120, gameHeight - 80, 'btn_jump').setInteractive().setScrollFactor(0).setScale(2);
+                this.leftBtn = this.add.image(120, 370, 'btn_left').setInteractive().setScrollFactor(0).setScale(2);
+                this.rightBtn = this.add.image(300, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(2);
+                this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(2);
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
@@ -173,14 +162,6 @@ window.addEventListener('load', function () {
                     if (navigator.vibrate) navigator.vibrate(50);
                 });
             }
-
-            // -------------------
-            // Responsive Resize
-            // -------------------
-            this.scale.on('resize', (gameSize) => {
-                gameWidth = gameSize.width;
-                this.cameras.resize(gameWidth, gameHeight);
-            });
         }
 
         collectFootball(player, football) {
@@ -203,7 +184,7 @@ window.addEventListener('load', function () {
                 }
             }
 
-            if (this.player.y > gameHeight) this.scene.restart({ playerName: this.playerName });
+            if (this.player.y > 450) this.scene.restart({ playerName: this.playerName });
 
             this.footballs.children.iterate(f => {
                 f.y = f.baseY + Math.sin(time / 500 + f.angleOffset) * 10;
@@ -238,7 +219,7 @@ window.addEventListener('load', function () {
 
         showQuestion() {
             this.children.removeAll();
-            this.add.rectangle(gameWidth/2, gameHeight/2, gameWidth, gameHeight, 0x1E3A8A);
+            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
             const q = this.questions[this.index];
             this.add.text(50, 50, q.q, { font: '26px Arial', fill: '#ffffff', wordWrap: { width: 700 } });
             q.a.forEach((opt, i) => {
@@ -274,7 +255,7 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         create() {
-            this.add.rectangle(gameWidth/2, gameHeight/2, gameWidth, gameHeight, 0x1E3A8A);
+            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
             this.add.text(120, 180,
                 `Glückwunsch ${this.playerName}!\n\nDu bist herzlich eingeladen zur\n SUPER BOWL PARTY\n am 08.02.2026\n in Elsbethen!`,
                 { font: '28px Arial', fill: '#ffffff', align: 'center' }
@@ -287,13 +268,12 @@ window.addEventListener('load', function () {
     ===================== */
     new Phaser.Game({
         type: Phaser.AUTO,
-        width: gameWidth,
-        height: gameHeight,
+        width: 800,
+        height: 450,
         parent: 'game-container',
         physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
         dom: { createContainer: true },
-        scene: [NameScene, GameScene, QuizScene, EndScene],
-        scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }
+        scene: [NameScene, GameScene, QuizScene, EndScene]
     });
 
 });
