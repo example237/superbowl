@@ -78,8 +78,8 @@ window.addEventListener('load', function () {
             const start = platformsData[0];
             this.player = this.physics.add.sprite(start.x, start.y - 50, 'player');
             this.player.setGravityY(900);
-
             this.canDoubleJump = true;
+
             this.physics.add.collider(this.player, this.platforms, () => {
                 this.canDoubleJump = true;
             });
@@ -119,26 +119,30 @@ window.addEventListener('load', function () {
                 fill: '#ffffff'
             }).setScrollFactor(0);
 
-            /* Mobile Buttons */
+            /* =====================
+               MOBILE BUTTONS (GROSS)
+            ===================== */
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
             if (isMobile) {
                 const w = this.scale.width;
                 const h = this.scale.height;
 
-                this.leftBtn = this.add.image(80, h - 70, 'btn_left')
-                    .setScale(0.5).setScrollFactor(0).setInteractive();
-                this.rightBtn = this.add.image(170, h - 70, 'btn_right')
-                    .setScale(0.5).setScrollFactor(0).setInteractive();
-                this.jumpBtn = this.add.image(w - 80, h - 70, 'btn_jump')
-                    .setScale(0.5).setScrollFactor(0).setInteractive();
+                this.leftBtn = this.add.image(120, h - 90, 'btn_left')
+                    .setScale(0.9).setScrollFactor(0).setInteractive();
+
+                this.rightBtn = this.add.image(260, h - 90, 'btn_right')
+                    .setScale(0.9).setScrollFactor(0).setInteractive();
+
+                this.jumpBtn = this.add.image(w - 120, h - 90, 'btn_jump')
+                    .setScale(1.0).setScrollFactor(0).setInteractive();
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.rightBtn.on('pointerdown', () => this.player.setVelocityX(220));
 
-                [this.leftBtn, this.rightBtn].forEach(b =>
-                    b.on('pointerup', () => this.player.setVelocityX(0))
-                     .on('pointerout', () => this.player.setVelocityX(0))
-                );
+                [this.leftBtn, this.rightBtn].forEach(b => {
+                    b.on('pointerup', () => this.player.setVelocityX(0));
+                    b.on('pointerout', () => this.player.setVelocityX(0));
+                });
 
                 this.jumpBtn.on('pointerdown', () => {
                     if (this.player.body.blocked.down) {
@@ -165,7 +169,6 @@ window.addEventListener('load', function () {
                     this.player.setVelocityY(-800);
                     this.canDoubleJump = false;
                 }
-                if (navigator.vibrate) navigator.vibrate(20);
             }
 
             this.footballs.children.iterate(b => {
