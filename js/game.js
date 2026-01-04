@@ -1,7 +1,7 @@
 window.addEventListener('load', function () {
 
-    const gameWidth = window.innerWidth;  // Dynamische Breite
-    const gameHeight = 450;
+    let gameWidth = window.innerWidth;
+    let gameHeight = 450;
 
     /* =====================
        NAME
@@ -11,18 +11,15 @@ window.addEventListener('load', function () {
 
         create(data) {
             this.playerName = data?.playerName || null;
-
             this.cameras.main.setScroll(0, 0);
             this.add.rectangle(gameWidth/2, gameHeight/2, gameWidth, gameHeight, 0x1E3A8A);
 
             this.add.text(gameWidth/2 - 180, 80, 'Gib deinen Namen ein:', {
-                font: '28px Arial',
-                fill: '#ffffff'
+                font: '28px Arial', fill: '#ffffff'
             });
 
             const input = this.add.dom(gameWidth/2, 170, 'input',
                 'width:300px;height:45px;font-size:20px;text-align:center;');
-
             if (this.playerName) input.node.value = this.playerName;
 
             const btn = this.add.dom(gameWidth/2, 240, 'button',
@@ -58,7 +55,6 @@ window.addEventListener('load', function () {
             this.physics.world.setBounds(0, 0, worldWidth, gameHeight);
             this.cameras.main.setBounds(0, 0, worldWidth, gameHeight);
 
-            // Hintergrund
             this.add.rectangle(worldWidth/2, gameHeight/2, worldWidth, gameHeight, 0x87CEEB);
 
             // -------------------
@@ -67,29 +63,26 @@ window.addEventListener('load', function () {
             this.platforms = this.physics.add.staticGroup();
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },
-                { x: 320, y: 260, scale: 1.2 },
-                { x: 490, y: 220, scale: 1.0 },
-                { x: 660, y: 250, scale: 1.2 },
-                { x: 830, y: 210, scale: 1.0 },
-                { x: 1000, y: 250, scale: 1.2 },
-                { x: 1170, y: 220, scale: 1.0 },
-                { x: 1340, y: 250, scale: 1.3 },
-                { x: 1510, y: 220, scale: 1.0 },
-                { x: 1680, y: 250, scale: 1.3 },
-                { x: 1850, y: 220, scale: 1.0 },
-                { x: 2020, y: 250, scale: 1.3 },
-                { x: 2190, y: 220, scale: 1.0 },
-                { x: 2360, y: 250, scale: 1.3 },
-                { x: 2530, y: 220, scale: 1.0 },
-                { x: 2700, y: 250, scale: 1.3 },
-                { x: 2870, y: 220, scale: 1.0 },
-                { x: 3040, y: 250, scale: 1.2 },
-                { x: 3210, y: 220, scale: 1.0 },
-                { x: 3380, y: 250, scale: 1.3 },
-                { x: 3550, y: 220, scale: 1.0 },
-                { x: 3720, y: 250, scale: 1.2 },
-                { x: 3890, y: 220, scale: 1.0 },
-                { x: 4060, y: 250, scale: 1.3 }
+                { x: 350, y: 260, scale: 1.2 },
+                { x: 550, y: 220, scale: 1.0 },
+                { x: 750, y: 250, scale: 1.2 },
+                { x: 950, y: 210, scale: 1.0 },
+                { x: 1150, y: 250, scale: 1.2 },
+                { x: 1350, y: 220, scale: 1.0 },
+                { x: 1550, y: 250, scale: 1.3 },
+                { x: 1750, y: 220, scale: 1.0 },
+                { x: 1950, y: 250, scale: 1.3 },
+                { x: 2150, y: 220, scale: 1.0 },
+                { x: 2350, y: 250, scale: 1.3 },
+                { x: 2550, y: 220, scale: 1.0 },
+                { x: 2750, y: 250, scale: 1.3 },
+                { x: 2950, y: 220, scale: 1.0 },
+                { x: 3200, y: 250, scale: 1.3 },
+                { x: 3500, y: 220, scale: 1.0 },
+                { x: 3800, y: 250, scale: 1.2 },
+                { x: 4100, y: 220, scale: 1.0 },
+                { x: 4400, y: 250, scale: 1.3 },
+                { x: 4700, y: 220, scale: 1.0 }
             ];
 
             platformsData.forEach(p => {
@@ -102,19 +95,11 @@ window.addEventListener('load', function () {
             this.goalPlatform.setScale(1.8, 1.2).refreshBody();
             this.goalPlatform.setTint(0xffd700);
             this.goalText = this.add.text(4700, 150, 'ZIEL', {
-                font: '24px Arial',
-                fill: '#ffd700',
-                stroke: '#000',
-                strokeThickness: 4
+                font: '24px Arial', fill: '#ffd700', stroke: '#000', strokeThickness: 4
             }).setOrigin(0.5);
 
             this.tweens.add({
-                targets: this.goalPlatform,
-                scaleX: 2.0,
-                duration: 800,
-                yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut'
+                targets: this.goalPlatform, scaleX: 2.0, duration: 800, yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
             });
 
             // -------------------
@@ -158,8 +143,7 @@ window.addEventListener('load', function () {
             this.physics.add.overlap(this.player, this.footballs, this.collectFootball, null, this);
 
             this.footballText = this.add.text(10, 10, 'Football: 0', {
-                font: '24px Arial',
-                fill: '#ffffff'
+                font: '24px Arial', fill: '#ffffff'
             }).setScrollFactor(0);
 
             // -------------------
@@ -175,9 +159,9 @@ window.addEventListener('load', function () {
             // -------------------
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
             if (isMobile) {
-                this.leftBtn = this.add.image(100, gameHeight - 80, 'btn_left').setInteractive().setScrollFactor(0).setScale(1.5);
-                this.rightBtn = this.add.image(260, gameHeight - 80, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.5);
-                this.jumpBtn = this.add.image(gameWidth - 100, gameHeight - 80, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.5);
+                this.leftBtn = this.add.image(120, gameHeight - 80, 'btn_left').setInteractive().setScrollFactor(0).setScale(2);
+                this.rightBtn = this.add.image(300, gameHeight - 80, 'btn_right').setInteractive().setScrollFactor(0).setScale(2);
+                this.jumpBtn = this.add.image(gameWidth - 120, gameHeight - 80, 'btn_jump').setInteractive().setScrollFactor(0).setScale(2);
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
@@ -189,6 +173,14 @@ window.addEventListener('load', function () {
                     if (navigator.vibrate) navigator.vibrate(50);
                 });
             }
+
+            // -------------------
+            // Responsive Resize
+            // -------------------
+            this.scale.on('resize', (gameSize) => {
+                gameWidth = gameSize.width;
+                this.cameras.resize(gameWidth, gameHeight);
+            });
         }
 
         collectFootball(player, football) {
@@ -211,9 +203,7 @@ window.addEventListener('load', function () {
                 }
             }
 
-            if (this.player.y > gameHeight) {
-                this.scene.restart({ playerName: this.playerName });
-            }
+            if (this.player.y > gameHeight) this.scene.restart({ playerName: this.playerName });
 
             this.footballs.children.iterate(f => {
                 f.y = f.baseY + Math.sin(time / 500 + f.angleOffset) * 10;
@@ -302,7 +292,8 @@ window.addEventListener('load', function () {
         parent: 'game-container',
         physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
         dom: { createContainer: true },
-        scene: [NameScene, GameScene, QuizScene, EndScene]
+        scene: [NameScene, GameScene, QuizScene, EndScene],
+        scale: { mode: Phaser.Scale.RESIZE, autoCenter: Phaser.Scale.CENTER_BOTH }
     });
 
 });
