@@ -208,7 +208,7 @@ window.addEventListener('load', function () {
         create() {
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
             this.add.text(120, 180,
-                `Glückwunsch ${this.playerName}!\n\nSUPER BOWL PARTY\n08.02.2026\nElsbethen`,
+                `Glückwunsch ${this.playerName}!\n\nDu bist herzlich eingeladen zur \nSUPER BOWL PARTY\n am 08.02.2026\n in Elsbethen`,
                 { font: '28px Arial', fill: '#ffffff', align: 'center' }
             );
         }
@@ -225,3 +225,4 @@ window.addEventListener('load', function () {
     });
 
 });
+
