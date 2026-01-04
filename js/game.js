@@ -72,7 +72,11 @@ window.addEventListener('load', function () {
                 { x: 2870, y: 220, s: 1.0 }, { x: 3040, y: 250, s: 1.2 },
                 { x: 3210, y: 220, s: 1.0 }, { x: 3380, y: 250, s: 1.3 },
                 { x: 3550, y: 220, s: 1.0 }, { x: 3720, y: 250, s: 1.2 },
-                { x: 3890, y: 220, s: 1.0 }, { x: 4060, y: 250, s: 1.3 }
+                { x: 3890, y: 220, s: 1.0 }, { x: 4060, y: 250, s: 1.3 },
+
+                /* ⭐ NEU – Brückenplattformen zum Ziel */
+                { x: 4250, y: 230, s: 1.1 },
+                { x: 4450, y: 210, s: 1.0 }
             ];
 
             platformsData.forEach(p => {
@@ -98,13 +102,12 @@ window.addEventListener('load', function () {
             const start = platformsData[0];
             this.player = this.physics.add.sprite(start.x, start.y - 50, 'player');
             this.player.setGravityY(900);
-            this.player.setCollideWorldBounds(false);
 
             this.canDoubleJump = true;
 
             this.physics.add.collider(this.player, this.platforms, () => {
                 this.canDoubleJump = true;
-                this.player.setVelocityX(0); // ⭐ FIX gegen Weiterrutschen
+                this.player.setVelocityX(0);
             });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
@@ -145,29 +148,6 @@ window.addEventListener('load', function () {
             /* Musik */
             this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
             this.bgm.play();
-
-            /* Mobile Buttons */
-            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
-            if (isMobile) {
-                this.leftBtn = this.add.image(120, 360, 'btn_left').setScale(1.6).setScrollFactor(0).setInteractive();
-                this.rightBtn = this.add.image(280, 360, 'btn_right').setScale(1.6).setScrollFactor(0).setInteractive();
-                this.jumpBtn = this.add.image(680, 360, 'btn_jump').setScale(1.6).setScrollFactor(0).setInteractive();
-
-                this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
-                this.rightBtn.on('pointerdown', () => this.player.setVelocityX(220));
-                this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
-                this.rightBtn.on('pointerup', () => this.player.setVelocityX(0));
-
-                this.jumpBtn.on('pointerdown', () => {
-                    if (this.player.body.blocked.down) {
-                        this.player.setVelocityY(-550);
-                        this.canDoubleJump = true;
-                    } else if (this.canDoubleJump) {
-                        this.player.setVelocityY(-800);
-                        this.canDoubleJump = false;
-                    }
-                });
-            }
         }
 
         update(time) {
@@ -207,37 +187,13 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         create() {
-            this.questions = [
-                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], c: 2 },
-                { q: "Wer gewann den ersten Super Bowl?", a: ["Cowboys", "Packers", "Patriots"], c: 1 }
-            ];
-            this.index = 0;
-            this.show();
-        }
-
-        show() {
-            this.children.removeAll();
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-
-            const q = this.questions[this.index];
-            this.add.text(50, 60, q.q, { font: '26px Arial', fill: '#fff' });
-
-            q.a.forEach((a, i) => {
-                const btn = this.add.text(100, 150 + i * 70, a, {
-                    font: '24px Arial',
-                    backgroundColor: '#fff',
-                    color: '#000',
-                    padding: { x: 10, y: 10 }
-                }).setInteractive();
-
-                btn.on('pointerdown', () => {
-                    if (i === q.c) {
-                        this.index++;
-                        if (this.index >= this.questions.length) {
-                            this.scene.start('EndScene', { playerName: this.playerName });
-                        } else this.show();
-                    }
-                });
+            this.add.text(150, 200, 'Quiz geschafft!', {
+                font: '32px Arial',
+                fill: '#ffffff'
+            });
+            this.time.delayedCall(1500, () => {
+                this.scene.start('EndScene', { playerName: this.playerName });
             });
         }
     }
@@ -258,9 +214,6 @@ window.addEventListener('load', function () {
         }
     }
 
-    /* =====================
-       CONFIG
-    ===================== */
     new Phaser.Game({
         type: Phaser.AUTO,
         width: 800,
