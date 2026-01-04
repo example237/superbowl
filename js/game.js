@@ -44,7 +44,15 @@ window.addEventListener('load', function () {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
+
+            this.load.image('btn_left', 'assets/sprites/btn_left.png');
+            this.load.image('btn_right', 'assets/sprites/btn_right.png');
+            this.load.image('btn_jump', 'assets/sprites/btn_jump.png');
+
             this.load.audio('bgm', 'assets/audio/bg2.mp3');
+
+            /* Quiz-Daten */
+            this.load.json('questions', 'assets/data/questions.json');
         }
 
         create() {
@@ -57,25 +65,36 @@ window.addEventListener('load', function () {
 
             /* ---------- Plattformen ---------- */
             this.platforms = this.physics.add.staticGroup();
+
             const platforms = [
-                { x: 150, y: 300 }, { x: 320, y: 260 }, { x: 490, y: 220 },
-                { x: 660, y: 250 }, { x: 830, y: 210 }, { x: 1000, y: 250 },
-                { x: 1170, y: 220 }, { x: 1340, y: 250 }, { x: 1510, y: 220 },
-                { x: 1680, y: 250 }, { x: 1850, y: 220 }, { x: 2020, y: 250 },
-                { x: 2190, y: 220 }, { x: 2360, y: 250 }, { x: 2530, y: 220 },
-                { x: 2700, y: 250 }, { x: 2870, y: 220 }, { x: 3040, y: 250 },
-                { x: 3210, y: 220 }, { x: 3380, y: 250 }, { x: 3550, y: 220 },
-                { x: 3720, y: 250 }, { x: 3890, y: 220 }, { x: 4060, y: 250 },
-                { x: 4250, y: 230 }, { x: 4450, y: 210 }
+                { x: 150, y: 300 }, { x: 320, y: 260 }, { x: 500, y: 230 },
+                { x: 680, y: 250 }, { x: 860, y: 220 }, { x: 1040, y: 250 },
+                { x: 1220, y: 220 }, { x: 1400, y: 250 }, { x: 1580, y: 220 },
+                { x: 1760, y: 250 }, { x: 1940, y: 220 }, { x: 2120, y: 250 },
+                { x: 2300, y: 220 }, { x: 2480, y: 250 }, { x: 2660, y: 220 },
+                { x: 2840, y: 250 }, { x: 3020, y: 220 }, { x: 3200, y: 250 },
+                { x: 3380, y: 220 }, { x: 3560, y: 250 }, { x: 3740, y: 220 },
+                { x: 3920, y: 250 }, { x: 4100, y: 220 },
+                /* letzte beiden – bewusst näher */
+                { x: 4300, y: 240 },
+                { x: 4480, y: 230 }
             ];
 
             platforms.forEach(p => {
                 this.platforms.create(p.x, p.y, 'platform').refreshBody();
             });
 
+            /* ---------- Zielplattform ---------- */
             this.goalPlatform = this.platforms.create(4700, 220, 'platform')
                 .setTint(0xffd700)
                 .refreshBody();
+
+            this.add.text(4700, 150, 'ZIEL', {
+                font: '26px Arial',
+                fill: '#ffd700',
+                stroke: '#000',
+                strokeThickness: 4
+            }).setOrigin(0.5);
 
             /* ---------- Spieler ---------- */
             this.player = this.physics.add.sprite(150, 250, 'player');
@@ -96,9 +115,9 @@ window.addEventListener('load', function () {
             this.footballCount = 0;
 
             const footballData = [
-                { x: 250, y: 180 }, { x: 800, y: 200 },
-                { x: 1500, y: 160 }, { x: 2300, y: 180 },
-                { x: 3200, y: 180 }, { x: 4400, y: 180 }
+                { x: 260, y: 180 }, { x: 820, y: 190 },
+                { x: 1500, y: 170 }, { x: 2300, y: 180 },
+                { x: 3200, y: 180 }, { x: 4100, y: 180 }
             ];
 
             this.totalFootballs = footballData.length;
@@ -124,6 +143,7 @@ window.addEventListener('load', function () {
         update(time) {
             if (this.cursors.left.isDown) this.player.setVelocityX(-220);
             else if (this.cursors.right.isDown) this.player.setVelocityX(220);
+            else this.player.setVelocityX(0);
 
             if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 if (this.player.body.blocked.down) {
@@ -139,14 +159,21 @@ window.addEventListener('load', function () {
                 this.scene.restart({ playerName: this.playerName });
             }
 
-            /* --- Football-Schwebeanimation --- */
+            /* Football-Schweben */
             this.footballs.children.iterate(ball => {
                 ball.y = ball.baseY + Math.sin(time / 500 + ball.phase) * 12;
             });
 
-            if (this.player.x > 4650 && this.footballCount === this.totalFootballs) {
+            /* Ziel erreicht → Quiz */
+            if (
+                this.player.x > 4650 &&
+                this.footballCount === this.totalFootballs
+            ) {
                 this.bgm.stop();
-                this.scene.start('QuizScene', { playerName: this.playerName });
+                this.scene.start('QuizScene', {
+                    playerName: this.playerName,
+                    questions: this.cache.json.get('questions')
+                });
             }
         }
     }
@@ -156,15 +183,13 @@ window.addEventListener('load', function () {
     ===================== */
     class QuizScene extends Phaser.Scene {
         constructor() { super('QuizScene'); }
-        init(data) { this.playerName = data.playerName; }
+        init(data) {
+            this.playerName = data.playerName;
+            this.questions = data.questions;
+        }
 
         create() {
             this.index = 0;
-            this.questions = [
-                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], c: 2 },
-                { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"], c: 1 },
-                { q: "Wo findet die Party statt?", a: ["Salzburg", "Elsbethen", "Wien"], c: 1 }
-            ];
             this.showQuestion();
         }
 
@@ -173,6 +198,7 @@ window.addEventListener('load', function () {
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             const q = this.questions[this.index];
+
             this.add.text(80, 60, q.q, {
                 font: '26px Arial',
                 fill: '#ffffff',
@@ -188,7 +214,7 @@ window.addEventListener('load', function () {
                 }).setInteractive();
 
                 btn.on('pointerdown', () => {
-                    if (i === q.c) {
+                    if (i === q.correct) {
                         this.index++;
                         if (this.index >= this.questions.length) {
                             this.scene.start('EndScene', { playerName: this.playerName });
