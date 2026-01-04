@@ -50,105 +50,95 @@ window.addEventListener('load', function () {
 
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
-
             this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
-            /* =====================
-               PLATTFORMEN
-            ===================== */
+            /* Plattformen */
             this.platforms = this.physics.add.staticGroup();
             const platformsData = [
-                { x: 150, y: 300, scale: 1.5 },
-                { x: 350, y: 250, scale: 1.2 },
-                { x: 550, y: 200, scale: 1.0 },
-                { x: 750, y: 250, scale: 1.2 },
-                { x: 950, y: 200, scale: 1.0 },
-                { x: 1150, y: 250, scale: 1.2 },
-                { x: 1350, y: 200, scale: 1.0 },
-                { x: 1550, y: 250, scale: 1.3 },
-                { x: 1750, y: 200, scale: 1.0 },
-                { x: 1950, y: 250, scale: 1.3 },
-                { x: 2150, y: 200, scale: 1.0 },
-                { x: 2350, y: 250, scale: 1.3 },
-                { x: 2550, y: 200, scale: 1.0 },
-                { x: 2750, y: 250, scale: 1.3 },
-                { x: 2950, y: 200, scale: 1.0 },
-                { x: 3200, y: 250, scale: 1.3 },
-                { x: 3500, y: 220, scale: 1.0 },
-                { x: 3800, y: 250, scale: 1.2 },
-                { x: 4100, y: 220, scale: 1.0 },
-                { x: 4400, y: 250, scale: 1.3 },
+                { x: 150, y: 300, scale: 1.5 }, { x: 350, y: 250, scale: 1.2 },
+                { x: 550, y: 200, scale: 1.0 }, { x: 750, y: 250, scale: 1.2 },
+                { x: 950, y: 200, scale: 1.0 }, { x: 1150, y: 250, scale: 1.2 },
+                { x: 1350, y: 200, scale: 1.0 }, { x: 1550, y: 250, scale: 1.3 },
+                { x: 1750, y: 200, scale: 1.0 }, { x: 1950, y: 250, scale: 1.3 },
+                { x: 2150, y: 200, scale: 1.0 }, { x: 2350, y: 250, scale: 1.3 },
+                { x: 2550, y: 200, scale: 1.0 }, { x: 2750, y: 250, scale: 1.3 },
+                { x: 2950, y: 200, scale: 1.0 }, { x: 3200, y: 250, scale: 1.3 },
+                { x: 3500, y: 220, scale: 1.0 }, { x: 3800, y: 250, scale: 1.2 },
+                { x: 4100, y: 220, scale: 1.0 }, { x: 4400, y: 250, scale: 1.3 },
                 { x: 4700, y: 220, scale: 1.0 }
             ];
 
             platformsData.forEach(p => {
-                const plat = this.platforms.create(p.x, p.y, 'platform');
-                plat.setScale(p.scale, 1).refreshBody();
+                this.platforms.create(p.x, p.y, 'platform')
+                    .setScale(p.scale, 1)
+                    .refreshBody();
             });
 
-            /* =====================
-               SPIELER
-            ===================== */
-            const startPlatform = platformsData[0];
-            this.player = this.physics.add.sprite(startPlatform.x, startPlatform.y - 50, 'player');
-            this.player.setCollideWorldBounds(false);
+            /* Spieler */
+            const start = platformsData[0];
+            this.player = this.physics.add.sprite(start.x, start.y - 50, 'player');
             this.player.setGravityY(900);
-            this.player.setBounce(0);
-            this.player.body.setSize(this.player.width, this.player.height, true);
 
+            this.canDoubleJump = true;
             this.physics.add.collider(this.player, this.platforms, () => {
                 this.canDoubleJump = true;
             });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
-
             this.cursors = this.input.keyboard.createCursorKeys();
-            this.canDoubleJump = true;
 
-            /* =====================
-               FOOTBALLS
-            ===================== */
+            /* Footballs */
             this.footballs = this.physics.add.group();
             this.footballCount = 0;
 
             const footballsData = [
                 { x: 250, y: 180 }, { x: 500, y: 160 }, { x: 800, y: 200 },
                 { x: 1100, y: 180 }, { x: 1500, y: 160 }, { x: 1900, y: 200 },
-                { x: 2300, y: 180 }, { x: 2700, y: 160 }, { x: 3200, y: 180 },
-                { x: 3800, y: 200 }, { x: 4400, y: 180 }
+                { x: 2300, y: 180 }, { x: 2700, y: 160 },
+                { x: 3200, y: 180 }, { x: 3800, y: 200 }, { x: 4400, y: 180 }
             ];
 
             this.footballsData = footballsData.map(f => {
-                const football = this.footballs.create(f.x, f.y, 'football');
-                football.setScale(0.25);
-                football.body.setAllowGravity(false);
-                football.baseY = f.y;
-                football.angleOffset = Math.random() * Math.PI * 2;
-                return football;
+                const ball = this.footballs.create(f.x, f.y, 'football')
+                    .setScale(0.25);
+                ball.body.setAllowGravity(false);
+                ball.baseY = f.y;
+                ball.phase = Math.random() * Math.PI * 2;
+                return ball;
             });
 
-            this.physics.add.overlap(this.player, this.footballs, this.collectFootball, null, this);
+            this.physics.add.overlap(this.player, this.footballs, (_, ball) => {
+                ball.destroy();
+                this.footballCount++;
+                this.footballText.setText('Football: ' + this.footballCount);
+                if (navigator.vibrate) navigator.vibrate(40);
+            });
 
             this.footballText = this.add.text(10, 10, 'Football: 0', {
                 font: '24px Arial',
                 fill: '#ffffff'
             }).setScrollFactor(0);
 
-            /* =====================
-               MOBILE BUTTONS
-            ===================== */
-            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
-
+            /* Mobile Buttons */
+            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
             if (isMobile) {
-                this.leftBtn = this.add.image(70, 380, 'btn_left').setInteractive().setScrollFactor(0).setScale(0.5);
-                this.rightBtn = this.add.image(170, 380, 'btn_right').setInteractive().setScrollFactor(0).setScale(0.5);
-                this.jumpBtn = this.add.image(700, 380, 'btn_jump').setInteractive().setScrollFactor(0).setScale(0.5);
+                const w = this.scale.width;
+                const h = this.scale.height;
+
+                this.leftBtn = this.add.image(80, h - 70, 'btn_left')
+                    .setScale(0.5).setScrollFactor(0).setInteractive();
+                this.rightBtn = this.add.image(170, h - 70, 'btn_right')
+                    .setScale(0.5).setScrollFactor(0).setInteractive();
+                this.jumpBtn = this.add.image(w - 80, h - 70, 'btn_jump')
+                    .setScale(0.5).setScrollFactor(0).setInteractive();
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
-                this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
-
                 this.rightBtn.on('pointerdown', () => this.player.setVelocityX(220));
-                this.rightBtn.on('pointerup', () => this.player.setVelocityX(0));
+
+                [this.leftBtn, this.rightBtn].forEach(b =>
+                    b.on('pointerup', () => this.player.setVelocityX(0))
+                     .on('pointerout', () => this.player.setVelocityX(0))
+                );
 
                 this.jumpBtn.on('pointerdown', () => {
                     if (this.player.body.blocked.down) {
@@ -158,138 +148,33 @@ window.addEventListener('load', function () {
                         this.player.setVelocityY(-800);
                         this.canDoubleJump = false;
                     }
+                    if (navigator.vibrate) navigator.vibrate(30);
                 });
             }
-        }
-
-        collectFootball(player, football) {
-            football.destroy();
-            this.footballCount++;
-            this.footballText.setText('Football: ' + this.footballCount);
         }
 
         update(time) {
-            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
+            if (this.cursors.left.isDown) this.player.setVelocityX(-220);
+            else if (this.cursors.right.isDown) this.player.setVelocityX(220);
 
-            // Desktop Steuerung
-            if (!isMobile) {
-                if (this.cursors.left.isDown) this.player.setVelocityX(-220);
-                else if (this.cursors.right.isDown) this.player.setVelocityX(220);
-                else this.player.setVelocityX(0);
-
-                if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
-                    if (this.player.body.blocked.down) {
-                        this.player.setVelocityY(-550);
-                        this.canDoubleJump = true;
-                    } else if (this.canDoubleJump) {
-                        this.player.setVelocityY(-800);
-                        this.canDoubleJump = false;
-                    }
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
+                if (this.player.body.blocked.down) {
+                    this.player.setVelocityY(-550);
+                    this.canDoubleJump = true;
+                } else if (this.canDoubleJump) {
+                    this.player.setVelocityY(-800);
+                    this.canDoubleJump = false;
                 }
+                if (navigator.vibrate) navigator.vibrate(20);
             }
 
-            // Tod, wenn Spieler unter Canvas fällt
+            this.footballs.children.iterate(b => {
+                b.y = b.baseY + Math.sin(time / 500 + b.phase) * 10;
+            });
+
             if (this.player.y > 450) {
                 this.scene.start('NameScene');
             }
-
-            // Football-Schwebebewegung
-            this.footballs.children.iterate(f => {
-                f.y = f.baseY + Math.sin(time / 500 + f.angleOffset) * 10;
-            });
-
-            // Quiz nur, wenn alle Footballs gesammelt
-            if (this.player.x > 4750 && this.footballCount === this.footballsData.length) {
-                this.scene.start('QuizScene', { playerName: this.playerName });
-            }
-        }
-    }
-
-    /* =====================
-       QUIZ
-    ===================== */
-    class QuizScene extends Phaser.Scene {
-        constructor() { super('QuizScene'); }
-        init(data) { this.playerName = data.playerName; }
-
-        create() {
-            this.cameras.main.setScroll(0, 0);
-
-            this.questions = [
-                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], correct: 2 },
-                { q: "Wer gewann den allerersten SuperBowl?", a: ["Dallas Cowboys", "Green Bay Packers", "New England Patriots"], correct: 1 },
-                { q: "Wie viele Punkte gibt es für einen Touchdown?", a: ["3", "6", "7"], correct: 1 },
-                { q: "Welches dieser Teams hat noch nie einen Super Bowl gewonnen?", a: ["Minnesota Vikings", "Denver Broncos", "New England Patriots"], correct: 0 },
-                { q: "Wo feierst du heuer den SuperBowl?", a: ["Alleine zuhause", "San Francisco", "Elsbethen"], correct: 2 }
-            ];
-
-            this.index = 0;
-            this.feedback = null;
-            this.showQuestion();
-        }
-
-        showQuestion() {
-            this.children.removeAll();
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-
-            const q = this.questions[this.index];
-
-            this.add.text(50, 50, q.q, {
-                font: '26px Arial',
-                fill: '#ffffff',
-                wordWrap: { width: 700 }
-            });
-
-            q.a.forEach((opt, i) => {
-                const btn = this.add.text(100, 150 + i * 70, opt, {
-                    font: '24px Arial',
-                    backgroundColor: '#ffffff',
-                    color: '#000',
-                    padding: { x: 10, y: 10 }
-                }).setInteractive();
-
-                btn.on('pointerdown', () => this.check(i));
-            });
-        }
-
-        check(choice) {
-            if (this.feedback) this.feedback.destroy();
-
-            const correct = choice === this.questions[this.index].correct;
-
-            this.feedback = this.add.text(
-                240, 350,
-                correct ? 'RICHTIG!' : 'FALSCH – versuche es nochmal',
-                { font: '28px Arial', fill: correct ? '#00ff00' : '#ff0000' }
-            );
-
-            if (correct) {
-                this.time.delayedCall(1000, () => {
-                    this.index++;
-                    if (this.index >= this.questions.length) {
-                        this.scene.start('EndScene', { playerName: this.playerName });
-                    } else {
-                        this.showQuestion();
-                    }
-                });
-            }
-        }
-    }
-
-    /* =====================
-       END
-    ===================== */
-    class EndScene extends Phaser.Scene {
-        constructor() { super('EndScene'); }
-        init(data) { this.playerName = data.playerName; }
-
-        create() {
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-            this.add.text(
-                120, 180,
-                `Glückwunsch ${this.playerName}!\n\nDu bist herzlich eingeladen zur\n SUPER BOWL PARTY\n am 08.02.2026\n in Elsbethen!`,
-                { font: '28px Arial', fill: '#ffffff', align: 'center' }
-            );
         }
     }
 
@@ -303,7 +188,11 @@ window.addEventListener('load', function () {
         parent: 'game-container',
         physics: { default: 'arcade', arcade: { gravity: { y: 900 } } },
         dom: { createContainer: true },
-        scene: [NameScene, GameScene, QuizScene, EndScene]
+        scale: {
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH
+        },
+        scene: [NameScene, GameScene]
     });
 
 });
