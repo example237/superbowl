@@ -47,7 +47,7 @@ window.addEventListener('load', function () {
             this.load.image('btn_left', 'assets/sprites/btn_left.png');
             this.load.image('btn_right', 'assets/sprites/btn_right.png');
             this.load.image('btn_jump', 'assets/sprites/btn_jump.png');
-            this.load.audio('bgm', 'assets/audio/bg.mp3');
+            this.load.audio('bgm', 'assets/audio/bg2.mp3');
         }
 
         create() {
@@ -309,3 +309,4 @@ window.addEventListener('load', function () {
     });
 
 });
+
