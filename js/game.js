@@ -128,13 +128,13 @@ window.addEventListener('load', function () {
                 const h = this.scale.height;
 
                 this.leftBtn = this.add.image(120, h - 90, 'btn_left')
-                    .setScale(0.9).setScrollFactor(0).setInteractive();
+                    .setScale(1.3).setScrollFactor(0).setInteractive();
 
                 this.rightBtn = this.add.image(260, h - 90, 'btn_right')
-                    .setScale(0.9).setScrollFactor(0).setInteractive();
+                    .setScale(1.3).setScrollFactor(0).setInteractive();
 
                 this.jumpBtn = this.add.image(w - 120, h - 90, 'btn_jump')
-                    .setScale(1.0).setScrollFactor(0).setInteractive();
+                    .setScale(1.4).setScrollFactor(0).setInteractive();
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.rightBtn.on('pointerdown', () => this.player.setVelocityX(220));
@@ -199,3 +199,4 @@ window.addEventListener('load', function () {
     });
 
 });
+
