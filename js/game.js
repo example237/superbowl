@@ -55,8 +55,9 @@ window.addEventListener('load', function () {
 
             this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
+            /* ---------- Plattformen ---------- */
             this.platforms = this.physics.add.staticGroup();
-            const data = [
+            const platforms = [
                 { x: 150, y: 300 }, { x: 320, y: 260 }, { x: 490, y: 220 },
                 { x: 660, y: 250 }, { x: 830, y: 210 }, { x: 1000, y: 250 },
                 { x: 1170, y: 220 }, { x: 1340, y: 250 }, { x: 1510, y: 220 },
@@ -68,7 +69,7 @@ window.addEventListener('load', function () {
                 { x: 4250, y: 230 }, { x: 4450, y: 210 }
             ];
 
-            data.forEach(p => {
+            platforms.forEach(p => {
                 this.platforms.create(p.x, p.y, 'platform').refreshBody();
             });
 
@@ -76,6 +77,7 @@ window.addEventListener('load', function () {
                 .setTint(0xffd700)
                 .refreshBody();
 
+            /* ---------- Spieler ---------- */
             this.player = this.physics.add.sprite(150, 250, 'player');
             this.player.setGravityY(900);
 
@@ -89,20 +91,24 @@ window.addEventListener('load', function () {
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
             this.cursors = this.input.keyboard.createCursorKeys();
 
+            /* ---------- Footballs ---------- */
             this.footballs = this.physics.add.group();
             this.footballCount = 0;
 
-            const balls = [
-                { x: 250, y: 180 }, { x: 800, y: 200 }, { x: 1500, y: 160 },
-                { x: 2300, y: 180 }, { x: 3200, y: 180 }, { x: 4400, y: 180 }
+            const footballData = [
+                { x: 250, y: 180 }, { x: 800, y: 200 },
+                { x: 1500, y: 160 }, { x: 2300, y: 180 },
+                { x: 3200, y: 180 }, { x: 4400, y: 180 }
             ];
 
-            this.totalFootballs = balls.length;
+            this.totalFootballs = footballData.length;
 
-            balls.forEach(b => {
-                const f = this.footballs.create(b.x, b.y, 'football');
-                f.setScale(0.25);
-                f.body.setAllowGravity(false);
+            footballData.forEach(f => {
+                const ball = this.footballs.create(f.x, f.y, 'football');
+                ball.setScale(0.25);
+                ball.body.setAllowGravity(false);
+                ball.baseY = f.y;
+                ball.phase = Math.random() * Math.PI * 2;
             });
 
             this.physics.add.overlap(this.player, this.footballs, (p, f) => {
@@ -110,11 +116,12 @@ window.addEventListener('load', function () {
                 this.footballCount++;
             });
 
+            /* ---------- Musik ---------- */
             this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
             this.bgm.play();
         }
 
-        update() {
+        update(time) {
             if (this.cursors.left.isDown) this.player.setVelocityX(-220);
             else if (this.cursors.right.isDown) this.player.setVelocityX(220);
 
@@ -131,6 +138,11 @@ window.addEventListener('load', function () {
             if (this.player.y > 450) {
                 this.scene.restart({ playerName: this.playerName });
             }
+
+            /* --- Football-Schwebeanimation --- */
+            this.footballs.children.iterate(ball => {
+                ball.y = ball.baseY + Math.sin(time / 500 + ball.phase) * 12;
+            });
 
             if (this.player.x > 4650 && this.footballCount === this.totalFootballs) {
                 this.bgm.stop();
@@ -161,7 +173,6 @@ window.addEventListener('load', function () {
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             const q = this.questions[this.index];
-
             this.add.text(80, 60, q.q, {
                 font: '26px Arial',
                 fill: '#ffffff',
