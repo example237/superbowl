@@ -56,14 +56,10 @@ window.addEventListener('load', function () {
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
-            // Hintergrund
             this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
 
-            // -------------------
-            // Plattformen
-            // -------------------
+            /* Plattformen */
             this.platforms = this.physics.add.staticGroup();
-            // Alle Abstände jetzt erreichbar
             const platformsData = [
                 { x: 150, y: 300, scale: 1.5 },
                 { x: 320, y: 260, scale: 1.2 },
@@ -92,39 +88,29 @@ window.addEventListener('load', function () {
             ];
 
             platformsData.forEach(p => {
-                const plat = this.platforms.create(p.x, p.y, 'platform');
-                plat.setScale(p.scale, 1).refreshBody();
+                this.platforms.create(p.x, p.y, 'platform')
+                    .setScale(p.scale, 1)
+                    .refreshBody();
             });
 
-            // Zielplattform
-            this.goalPlatform = this.platforms.create(4700, 220, 'platform');
-            this.goalPlatform.setScale(1.8, 1.2).refreshBody();
-            this.goalPlatform.setTint(0xffd700);
-            this.goalText = this.add.text(4700, 150, 'ZIEL', {
-                font: '24px Arial',
-                fill: '#ffd700',
-                stroke: '#000',
-                strokeThickness: 4
-            }).setOrigin(0.5);
+            /* Zielplattform */
+            this.goalPlatform = this.platforms.create(4700, 220, 'platform')
+                .setScale(1.8, 1.2)
+                .setTint(0xffd700)
+                .refreshBody();
 
             this.tweens.add({
                 targets: this.goalPlatform,
-                scaleX: 2.0,
+                scaleX: 2,
                 duration: 800,
                 yoyo: true,
-                repeat: -1,
-                ease: 'Sine.easeInOut'
+                repeat: -1
             });
 
-            // -------------------
-            // Spieler
-            // -------------------
-            const startPlatform = platformsData[0];
-            this.player = this.physics.add.sprite(startPlatform.x, startPlatform.y - 50, 'player');
-            this.player.setCollideWorldBounds(false);
+            /* Spieler */
+            const start = platformsData[0];
+            this.player = this.physics.add.sprite(start.x, start.y - 50, 'player');
             this.player.setGravityY(900);
-            this.player.setBounce(0);
-            this.player.body.setSize(this.player.width, this.player.height, true);
 
             this.physics.add.collider(this.player, this.platforms, () => {
                 this.canDoubleJump = true;
@@ -134,9 +120,7 @@ window.addEventListener('load', function () {
             this.cursors = this.input.keyboard.createCursorKeys();
             this.canDoubleJump = true;
 
-            // -------------------
-            // Footballs
-            // -------------------
+            /* Footballs */
             this.footballs = this.physics.add.group();
             this.footballCount = 0;
 
@@ -147,68 +131,83 @@ window.addEventListener('load', function () {
                 { x: 3800, y: 200 }, { x: 4400, y: 180 }
             ];
 
-            this.footballsData = footballsData.map(f => {
-                const football = this.footballs.create(f.x, f.y, 'football');
-                football.setScale(0.25);
-                football.body.setAllowGravity(false);
-                football.baseY = f.y;
-                football.angleOffset = Math.random() * Math.PI * 2;
-                return football;
+            footballsData.forEach(f => {
+                const ball = this.footballs.create(f.x, f.y, 'football');
+                ball.setScale(0.25);
+                ball.body.setAllowGravity(false);
+                ball.baseY = f.y;
+                ball.offset = Math.random() * Math.PI * 2;
             });
 
-            this.physics.add.overlap(this.player, this.footballs, this.collectFootball, null, this);
+            this.physics.add.overlap(this.player, this.footballs, (p, b) => {
+                b.destroy();
+                this.footballCount++;
+                this.footballText.setText('Football: ' + this.footballCount);
+            });
 
             this.footballText = this.add.text(10, 10, 'Football: 0', {
                 font: '24px Arial',
                 fill: '#ffffff'
             }).setScrollFactor(0);
 
-            // -------------------
-            // Musik
-            // -------------------
-            if (!this.sound.get('bgm')) {
-                this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
-                this.bgm.play();
-            }
+            /* Musik */
+            this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
+            this.bgm.play();
 
-            // -------------------
-            // Mobile Buttons
-            // -------------------
-            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
-            if (isMobile) {
-                this.leftBtn = this.add.image(100, 370, 'btn_left').setInteractive().setScrollFactor(0).setScale(1.3);
-                this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.3);
-                this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.3);
+            /* =====================
+               MOBILE BUTTONS – FIX
+            ===================== */
+            if (this.sys.game.device.input.touch) {
+                const h = this.scale.height;
+                const w = this.scale.width;
+
+                this.leftBtn = this.add.image(100, h - 90, 'btn_left')
+                    .setScrollFactor(0)
+                    .setScale(2)
+                    .setInteractive();
+
+                this.rightBtn = this.add.image(260, h - 90, 'btn_right')
+                    .setScrollFactor(0)
+                    .setScale(2)
+                    .setInteractive();
+
+                this.jumpBtn = this.add.image(w - 120, h - 90, 'btn_jump')
+                    .setScrollFactor(0)
+                    .setScale(2.2)
+                    .setInteractive();
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
-                this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
                 this.rightBtn.on('pointerdown', () => this.player.setVelocityX(220));
+                this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
                 this.rightBtn.on('pointerup', () => this.player.setVelocityX(0));
+
                 this.jumpBtn.on('pointerdown', () => {
-                    if (this.player.body.blocked.down) { this.player.setVelocityY(-550); this.canDoubleJump = true; }
-                    else if (this.canDoubleJump) { this.player.setVelocityY(-800); this.canDoubleJump = false; }
-                    if (navigator.vibrate) navigator.vibrate(50);
+                    if (this.player.body.blocked.down) {
+                        this.player.setVelocityY(-550);
+                        this.canDoubleJump = true;
+                    } else if (this.canDoubleJump) {
+                        this.player.setVelocityY(-800);
+                        this.canDoubleJump = false;
+                    }
+                    navigator.vibrate?.(50);
                 });
             }
         }
 
-        collectFootball(player, football) {
-            football.destroy();
-            this.footballCount++;
-            this.footballText.setText('Football: ' + this.footballCount);
-        }
-
         update(time) {
-            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
-
-            if (!isMobile) {
+            if (!this.sys.game.device.input.touch) {
                 if (this.cursors.left.isDown) this.player.setVelocityX(-220);
                 else if (this.cursors.right.isDown) this.player.setVelocityX(220);
                 else this.player.setVelocityX(0);
 
                 if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
-                    if (this.player.body.blocked.down) { this.player.setVelocityY(-550); this.canDoubleJump = true; }
-                    else if (this.canDoubleJump) { this.player.setVelocityY(-800); this.canDoubleJump = false; }
+                    if (this.player.body.blocked.down) {
+                        this.player.setVelocityY(-550);
+                        this.canDoubleJump = true;
+                    } else if (this.canDoubleJump) {
+                        this.player.setVelocityY(-800);
+                        this.canDoubleJump = false;
+                    }
                 }
             }
 
@@ -216,82 +215,14 @@ window.addEventListener('load', function () {
                 this.scene.restart({ playerName: this.playerName });
             }
 
-            this.footballs.children.iterate(f => {
-                f.y = f.baseY + Math.sin(time / 500 + f.angleOffset) * 10;
+            this.footballs.children.iterate(b => {
+                b.y = b.baseY + Math.sin(time / 500 + b.offset) * 10;
             });
 
-            if (this.player.x > 4700 && this.footballCount === this.footballsData.length) {
-                if (this.bgm) this.bgm.stop();
+            if (this.player.x > 4700 && this.footballCount === this.footballs.children.size) {
+                this.bgm.stop();
                 this.scene.start('QuizScene', { playerName: this.playerName });
             }
-        }
-    }
-
-    /* =====================
-       QUIZ
-    ===================== */
-    class QuizScene extends Phaser.Scene {
-        constructor() { super('QuizScene'); }
-        init(data) { this.playerName = data.playerName; }
-
-        create() {
-            this.cameras.main.setScroll(0, 0);
-            this.questions = [
-                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], correct: 2 },
-                { q: "Wer gewann den allerersten SuperBowl?", a: ["Dallas Cowboys", "Green Bay Packers", "New England Patriots"], correct: 1 },
-                { q: "Wie viele Punkte gibt es für einen Touchdown?", a: ["3", "6", "7"], correct: 1 },
-                { q: "Welches dieser Teams hat noch nie einen Super Bowl gewonnen?", a: ["Minnesota Vikings", "Denver Broncos", "New England Patriots"], correct: 0 },
-                { q: "Wo feierst du heuer den SuperBowl?", a: ["Alleine zuhause", "San Francisco", "Elsbethen"], correct: 2 }
-            ];
-            this.index = 0; this.feedback = null;
-            this.showQuestion();
-        }
-
-        showQuestion() {
-            this.children.removeAll();
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-            const q = this.questions[this.index];
-
-            this.add.text(50, 50, q.q, { font: '26px Arial', fill: '#ffffff', wordWrap: { width: 700 } });
-
-            q.a.forEach((opt, i) => {
-                const btn = this.add.text(100, 150 + i * 70, opt, {
-                    font: '24px Arial', backgroundColor: '#ffffff', color: '#000', padding: { x: 10, y: 10 }
-                }).setInteractive();
-                btn.on('pointerdown', () => this.check(i));
-            });
-        }
-
-        check(choice) {
-            if (this.feedback) this.feedback.destroy();
-            const correct = choice === this.questions[this.index].correct;
-            this.feedback = this.add.text(240, 350,
-                correct ? 'RICHTIG!' : 'FALSCH – versuche es nochmal',
-                { font: '28px Arial', fill: correct ? '#00ff00' : '#ff0000' }
-            );
-            if (correct) {
-                this.time.delayedCall(1000, () => {
-                    this.index++;
-                    if (this.index >= this.questions.length) this.scene.start('EndScene', { playerName: this.playerName });
-                    else this.showQuestion();
-                });
-            }
-        }
-    }
-
-    /* =====================
-       END
-    ===================== */
-    class EndScene extends Phaser.Scene {
-        constructor() { super('EndScene'); }
-        init(data) { this.playerName = data.playerName; }
-
-        create() {
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-            this.add.text(120, 180,
-                `Glückwunsch ${this.playerName}!\n\nDu bist herzlich eingeladen zur\n SUPER BOWL PARTY\n am 08.02.2026\n in Elsbethen!`,
-                { font: '28px Arial', fill: '#ffffff', align: 'center' }
-            );
         }
     }
 
@@ -309,4 +240,3 @@ window.addEventListener('load', function () {
     });
 
 });
-
