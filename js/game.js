@@ -44,6 +44,9 @@ window.addEventListener('load', function () {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
+            this.load.image('btn_left', 'assets/sprites/btn_left.png');
+            this.load.image('btn_right', 'assets/sprites/btn_right.png');
+            this.load.image('btn_jump', 'assets/sprites/btn_jump.png');
             this.load.audio('bgm', 'assets/audio/bg2.mp3');
         }
 
@@ -73,19 +76,38 @@ window.addEventListener('load', function () {
                 this.platforms.create(p.x, p.y, 'platform').refreshBody();
             });
 
-            this.goalPlatform = this.platforms.create(4700, 220, 'platform')
+            this.goalPlatform = this.platforms.create(4600, 220, 'platform')
                 .setTint(0xffd700)
                 .refreshBody();
+
+            this.goalText = this.add.text(4600, 150, 'ZIEL', {
+                font: '28px Arial',
+                fill: '#ffd700',
+                stroke: '#000',
+                strokeThickness: 4
+            }).setOrigin(0.5);
 
             /* ---------- Spieler ---------- */
             this.player = this.physics.add.sprite(150, 250, 'player');
             this.player.setGravityY(900);
+            this.player.setBounce(0);
+            this.player.body.setSize(this.player.width, this.player.height, true);
 
             this.canDoubleJump = true;
+            this.reachedGoal = false;
 
-            this.physics.add.collider(this.player, this.platforms, () => {
+            this.physics.add.collider(this.player, this.platforms, (player, platform) => {
                 this.canDoubleJump = true;
-                this.player.setVelocityX(0);
+                if (!this.leftPressed && !this.rightPressed) this.player.setVelocityX(0);
+
+                // Quiz nur starten, wenn auf Zielplattform und alle Footballs gesammelt
+                if (platform === this.goalPlatform && !this.reachedGoal) {
+                    if (this.footballCount === this.totalFootballs) {
+                        this.reachedGoal = true;
+                        this.bgm.stop();
+                        this.scene.start('QuizScene', { playerName: this.playerName });
+                    }
+                }
             });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
@@ -100,7 +122,6 @@ window.addEventListener('load', function () {
                 { x: 1500, y: 160 }, { x: 2300, y: 180 },
                 { x: 3200, y: 180 }, { x: 4400, y: 180 }
             ];
-
             this.totalFootballs = footballData.length;
 
             footballData.forEach(f => {
@@ -119,35 +140,55 @@ window.addEventListener('load', function () {
             /* ---------- Musik ---------- */
             this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
             this.bgm.play();
+
+            /* ---------- Mobile Buttons ---------- */
+            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
+            if (isMobile) {
+                this.leftPressed = false;
+                this.rightPressed = false;
+
+                this.leftBtn = this.add.image(100, 370, 'btn_left').setInteractive().setScrollFactor(0).setScale(1.6);
+                this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.6);
+                this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.6);
+
+                this.leftBtn.on('pointerdown', () => { this.leftPressed = true; this.player.setVelocityX(-220); });
+                this.leftBtn.on('pointerup', () => { this.leftPressed = false; this.player.setVelocityX(0); });
+
+                this.rightBtn.on('pointerdown', () => { this.rightPressed = true; this.player.setVelocityX(220); });
+                this.rightBtn.on('pointerup', () => { this.rightPressed = false; this.player.setVelocityX(0); });
+
+                this.jumpBtn.on('pointerdown', () => {
+                    if (this.player.body.blocked.down) { this.player.setVelocityY(-550); this.canDoubleJump = true; }
+                    else if (this.canDoubleJump) { this.player.setVelocityY(-800); this.canDoubleJump = false; }
+                    if (navigator.vibrate) navigator.vibrate(50);
+                });
+            }
         }
 
         update(time) {
-            if (this.cursors.left.isDown) this.player.setVelocityX(-220);
-            else if (this.cursors.right.isDown) this.player.setVelocityX(220);
+            const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
 
-            if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
-                if (this.player.body.blocked.down) {
-                    this.player.setVelocityY(-550);
-                    this.canDoubleJump = true;
-                } else if (this.canDoubleJump) {
-                    this.player.setVelocityY(-800);
-                    this.canDoubleJump = false;
+            if (!isMobile) {
+                if (this.cursors.left.isDown) this.player.setVelocityX(-220);
+                else if (this.cursors.right.isDown) this.player.setVelocityX(220);
+                else this.player.setVelocityX(0);
+
+                if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
+                    if (this.player.body.blocked.down) { this.player.setVelocityY(-550); this.canDoubleJump = true; }
+                    else if (this.canDoubleJump) { this.player.setVelocityY(-800); this.canDoubleJump = false; }
                 }
+            } else {
+                if (this.leftPressed) this.player.setVelocityX(-220);
+                else if (this.rightPressed) this.player.setVelocityX(220);
+                else if (this.player.body.blocked.down) this.player.setVelocityX(0);
             }
 
-            if (this.player.y > 450) {
-                this.scene.restart({ playerName: this.playerName });
-            }
+            if (this.player.y > 450) this.scene.restart({ playerName: this.playerName });
 
             /* --- Football-Schwebeanimation --- */
             this.footballs.children.iterate(ball => {
                 ball.y = ball.baseY + Math.sin(time / 500 + ball.phase) * 12;
             });
-
-            if (this.player.x > 4650 && this.footballCount === this.totalFootballs) {
-                this.bgm.stop();
-                this.scene.start('QuizScene', { playerName: this.playerName });
-            }
         }
     }
 
@@ -165,6 +206,7 @@ window.addEventListener('load', function () {
                 { q: "Wie viele Punkte gibt ein Touchdown?", a: ["3", "6", "7"], c: 1 },
                 { q: "Wo findet die Party statt?", a: ["Salzburg", "Elsbethen", "Wien"], c: 1 }
             ];
+            this.feedback = null;
             this.showQuestion();
         }
 
@@ -173,11 +215,7 @@ window.addEventListener('load', function () {
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
 
             const q = this.questions[this.index];
-            this.add.text(80, 60, q.q, {
-                font: '26px Arial',
-                fill: '#ffffff',
-                wordWrap: { width: 640 }
-            });
+            this.add.text(80, 60, q.q, { font: '26px Arial', fill: '#ffffff', wordWrap: { width: 640 } });
 
             q.a.forEach((opt, i) => {
                 const btn = this.add.text(120, 150 + i * 70, opt, {
@@ -188,13 +226,17 @@ window.addEventListener('load', function () {
                 }).setInteractive();
 
                 btn.on('pointerdown', () => {
+                    if (this.feedback) this.feedback.destroy();
+
                     if (i === q.c) {
                         this.index++;
                         if (this.index >= this.questions.length) {
                             this.scene.start('EndScene', { playerName: this.playerName });
-                        } else {
-                            this.showQuestion();
-                        }
+                        } else this.showQuestion();
+                    } else {
+                        this.feedback = this.add.text(200, 350, 'FALSCH – probiere es nochmals', {
+                            font: '28px Arial', fill: '#ff0000'
+                        });
                     }
                 });
             });
