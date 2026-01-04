@@ -45,18 +45,13 @@ window.addEventListener('load', function () {
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
 
-            this.load.image('btn_left', 'assets/sprites/btn_left.png');
-            this.load.image('btn_right', 'assets/sprites/btn_right.png');
-            this.load.image('btn_jump', 'assets/sprites/btn_jump.png');
-
             this.load.audio('bgm', 'assets/audio/bg2.mp3');
 
-            /* Quiz-Daten */
             this.load.json('questions', 'assets/data/questions.json');
         }
 
         create() {
-            const worldWidth = 5000;
+            const worldWidth = 4600;
 
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
@@ -74,22 +69,19 @@ window.addEventListener('load', function () {
                 { x: 2300, y: 220 }, { x: 2480, y: 250 }, { x: 2660, y: 220 },
                 { x: 2840, y: 250 }, { x: 3020, y: 220 }, { x: 3200, y: 250 },
                 { x: 3380, y: 220 }, { x: 3560, y: 250 }, { x: 3740, y: 220 },
-                { x: 3920, y: 250 }, { x: 4100, y: 220 },
-                /* letzte beiden – bewusst näher */
-                { x: 4300, y: 240 },
-                { x: 4480, y: 230 }
+                { x: 3920, y: 250 }, { x: 4100, y: 220 }
             ];
 
             platforms.forEach(p => {
                 this.platforms.create(p.x, p.y, 'platform').refreshBody();
             });
 
-            /* ---------- Zielplattform ---------- */
-            this.goalPlatform = this.platforms.create(4700, 220, 'platform')
+            /* ---------- Zielplattform (JETZT ERREICHBAR) ---------- */
+            this.goalPlatform = this.platforms.create(4300, 240, 'platform')
                 .setTint(0xffd700)
                 .refreshBody();
 
-            this.add.text(4700, 150, 'ZIEL', {
+            this.add.text(4300, 170, 'ZIEL', {
                 font: '26px Arial',
                 fill: '#ffd700',
                 stroke: '#000',
@@ -101,10 +93,14 @@ window.addEventListener('load', function () {
             this.player.setGravityY(900);
 
             this.canDoubleJump = true;
+            this.reachedGoal = false;
 
-            this.physics.add.collider(this.player, this.platforms, () => {
+            this.physics.add.collider(this.player, this.platforms, (player, platform) => {
                 this.canDoubleJump = true;
-                this.player.setVelocityX(0);
+
+                if (platform === this.goalPlatform && !this.reachedGoal) {
+                    this.tryFinish();
+                }
             });
 
             this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
@@ -117,7 +113,7 @@ window.addEventListener('load', function () {
             const footballData = [
                 { x: 260, y: 180 }, { x: 820, y: 190 },
                 { x: 1500, y: 170 }, { x: 2300, y: 180 },
-                { x: 3200, y: 180 }, { x: 4100, y: 180 }
+                { x: 3200, y: 180 }, { x: 3900, y: 180 }
             ];
 
             this.totalFootballs = footballData.length;
@@ -140,6 +136,18 @@ window.addEventListener('load', function () {
             this.bgm.play();
         }
 
+        tryFinish() {
+            if (this.footballCount === this.totalFootballs) {
+                this.reachedGoal = true;
+                this.bgm.stop();
+
+                this.scene.start('QuizScene', {
+                    playerName: this.playerName,
+                    questions: this.cache.json.get('questions')
+                });
+            }
+        }
+
         update(time) {
             if (this.cursors.left.isDown) this.player.setVelocityX(-220);
             else if (this.cursors.right.isDown) this.player.setVelocityX(220);
@@ -159,22 +167,9 @@ window.addEventListener('load', function () {
                 this.scene.restart({ playerName: this.playerName });
             }
 
-            /* Football-Schweben */
             this.footballs.children.iterate(ball => {
                 ball.y = ball.baseY + Math.sin(time / 500 + ball.phase) * 12;
             });
-
-            /* Ziel erreicht → Quiz */
-            if (
-                this.player.x > 4650 &&
-                this.footballCount === this.totalFootballs
-            ) {
-                this.bgm.stop();
-                this.scene.start('QuizScene', {
-                    playerName: this.playerName,
-                    questions: this.cache.json.get('questions')
-                });
-            }
         }
     }
 
