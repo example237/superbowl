@@ -48,7 +48,7 @@ window.addEventListener('load', function () {
         }
 
         create() {
-            const worldWidth = 5000;
+            const worldWidth = 5200;
 
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
@@ -56,22 +56,26 @@ window.addEventListener('load', function () {
 
             /* PLATTFORMEN */
             this.platforms = this.physics.add.staticGroup();
-            this.platformData = [
+
+            const platformData = [
                 { x: 150, y: 300 }, { x: 350, y: 250 }, { x: 550, y: 200 },
                 { x: 750, y: 250 }, { x: 950, y: 200 }, { x: 1150, y: 250 },
                 { x: 1350, y: 200 }, { x: 1550, y: 250 }, { x: 1750, y: 200 },
                 { x: 1950, y: 250 }, { x: 2150, y: 200 }, { x: 2350, y: 250 },
                 { x: 2550, y: 200 }, { x: 2750, y: 250 }, { x: 2950, y: 200 },
                 { x: 3200, y: 250 }, { x: 3500, y: 220 }, { x: 3800, y: 250 },
-                { x: 4100, y: 220 }, { x: 4400, y: 250 }, { x: 4700, y: 220 }
+                { x: 4100, y: 220 }, { x: 4400, y: 250 },
+
+                // ✅ ZIELPLATTFORM
+                { x: 4800, y: 220 }
             ];
 
-            this.platformData.forEach(p => {
+            platformData.forEach(p => {
                 this.platforms.create(p.x, p.y, 'platform').refreshBody();
             });
 
             /* SPIELER */
-            const start = this.platformData[0];
+            const start = platformData[0];
             this.player = this.physics.add.sprite(start.x, start.y - 50, 'player');
             this.player.setGravityY(900);
             this.player.setCollideWorldBounds(false);
@@ -91,7 +95,7 @@ window.addEventListener('load', function () {
             const footballData = [
                 { x: 250, y: 180 }, { x: 800, y: 200 },
                 { x: 1500, y: 160 }, { x: 2300, y: 180 },
-                { x: 3200, y: 180 }, { x: 4400, y: 180 }
+                { x: 3200, y: 180 }, { x: 4100, y: 180 }
             ];
 
             footballData.forEach(f => {
@@ -109,13 +113,27 @@ window.addEventListener('load', function () {
                 fill: '#ffffff'
             }).setScrollFactor(0);
 
-            /* MOBILE BUTTONS */
+            /* 🎯 QUIZ-TRIGGER (unsichtbar) */
+            this.quizTrigger = this.physics.add.staticSprite(4800, 170, null)
+                .setSize(80, 200)
+                .setVisible(false);
+
+            this.physics.add.overlap(this.player, this.quizTrigger, () => {
+                if (this.footballCount === this.footballs.getLength()) {
+                    this.scene.start('QuizScene', { playerName: this.playerName });
+                }
+            });
+
+            /* MOBILE BUTTONS (größer) */
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS;
 
             if (isMobile) {
-                this.leftBtn = this.add.image(140, 360, 'btn_left').setScale(1.2).setScrollFactor(0).setInteractive();
-                this.rightBtn = this.add.image(300, 360, 'btn_right').setScale(1.2).setScrollFactor(0).setInteractive();
-                this.jumpBtn = this.add.image(660, 360, 'btn_jump').setScale(1.2).setScrollFactor(0).setInteractive();
+                this.leftBtn = this.add.image(160, 360, 'btn_left')
+                    .setScale(1.5).setScrollFactor(0).setInteractive();
+                this.rightBtn = this.add.image(360, 360, 'btn_right')
+                    .setScale(1.5).setScrollFactor(0).setInteractive();
+                this.jumpBtn = this.add.image(650, 360, 'btn_jump')
+                    .setScale(1.6).setScrollFactor(0).setInteractive();
 
                 this.leftBtn.on('pointerdown', () => this.player.setVelocityX(-220));
                 this.leftBtn.on('pointerup', () => this.player.setVelocityX(0));
@@ -155,10 +173,6 @@ window.addEventListener('load', function () {
             this.footballs.children.iterate(b => {
                 b.y = b.baseY + Math.sin(time / 500 + b.offset) * 10;
             });
-
-            if (this.player.x > 4700 && this.footballCount === this.footballs.getLength()) {
-                this.scene.start('QuizScene', { playerName: this.playerName });
-            }
         }
     }
 
@@ -201,24 +215,17 @@ window.addEventListener('load', function () {
                     padding: { x: 10, y: 10 }
                 }).setInteractive();
 
-                btn.on('pointerdown', () => this.checkAnswer(i));
-            });
-        }
-
-        checkAnswer(choice) {
-            if (choice === this.questions[this.index].c) {
-                this.index++;
-                if (this.index >= this.questions.length) {
-                    this.scene.start('EndScene', { playerName: this.playerName });
-                } else {
-                    this.showQuestion();
-                }
-            } else {
-                this.add.text(260, 360, 'Falsch – versuche es nochmal', {
-                    font: '26px Arial',
-                    fill: '#ff0000'
+                btn.on('pointerdown', () => {
+                    if (i === q.c) {
+                        this.index++;
+                        if (this.index >= this.questions.length) {
+                            this.scene.start('EndScene', { playerName: this.playerName });
+                        } else {
+                            this.showQuestion();
+                        }
+                    }
                 });
-            }
+            });
         }
     }
 
@@ -232,16 +239,14 @@ window.addEventListener('load', function () {
 
         create() {
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-            this.add.text(120, 180,
+            this.add.text(
+                120, 180,
                 `Glückwunsch ${this.playerName}!\n\nSUPER BOWL PARTY\n08.02.2026`,
                 { font: '28px Arial', fill: '#ffffff', align: 'center' }
             );
         }
     }
 
-    /* =====================
-       CONFIG
-    ===================== */
     new Phaser.Game({
         type: Phaser.AUTO,
         width: 800,
