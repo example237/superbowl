@@ -44,9 +44,12 @@ window.addEventListener('load', function () {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
+            this.load.image('background', 'assets/sprites/background1.png');
+
             this.load.image('btn_left', 'assets/sprites/btn_left.png');
             this.load.image('btn_right', 'assets/sprites/btn_right.png');
             this.load.image('btn_jump', 'assets/sprites/btn_jump.png');
+
             this.load.audio('bgm', 'assets/audio/bg2.mp3');
         }
 
@@ -56,7 +59,14 @@ window.addEventListener('load', function () {
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
-            this.add.rectangle(worldWidth / 2, 225, worldWidth, 450, 0x87CEEB);
+            /* ---------- Hintergrund (Tile) ---------- */
+            this.bg = this.add.tileSprite(
+                worldWidth / 2,
+                225,
+                worldWidth,
+                450,
+                'background'
+            );
 
             /* ---------- Plattformen ---------- */
             this.platforms = this.physics.add.staticGroup();
@@ -91,16 +101,17 @@ window.addEventListener('load', function () {
             this.player = this.physics.add.sprite(150, 250, 'player');
             this.player.setGravityY(900);
             this.player.setBounce(0);
-            this.player.body.setSize(this.player.width, this.player.height, true);
 
             this.canDoubleJump = true;
             this.reachedGoal = false;
 
             this.physics.add.collider(this.player, this.platforms, (player, platform) => {
                 this.canDoubleJump = true;
-                if (!this.leftPressed && !this.rightPressed) this.player.setVelocityX(0);
 
-                // Quiz nur starten, wenn auf Zielplattform und alle Footballs gesammelt
+                if (!this.leftPressed && !this.rightPressed) {
+                    this.player.setVelocityX(0);
+                }
+
                 if (platform === this.goalPlatform && !this.reachedGoal) {
                     if (this.footballCount === this.totalFootballs) {
                         this.reachedGoal = true;
@@ -122,6 +133,7 @@ window.addEventListener('load', function () {
                 { x: 1500, y: 160 }, { x: 2300, y: 180 },
                 { x: 3200, y: 180 }, { x: 4400, y: 180 }
             ];
+
             this.totalFootballs = footballData.length;
 
             footballData.forEach(f => {
@@ -143,6 +155,7 @@ window.addEventListener('load', function () {
 
             /* ---------- Mobile Buttons ---------- */
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
+
             if (isMobile) {
                 this.leftPressed = false;
                 this.rightPressed = false;
@@ -151,16 +164,20 @@ window.addEventListener('load', function () {
                 this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.6);
                 this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.6);
 
-                this.leftBtn.on('pointerdown', () => { this.leftPressed = true; this.player.setVelocityX(-220); });
-                this.leftBtn.on('pointerup', () => { this.leftPressed = false; this.player.setVelocityX(0); });
+                this.leftBtn.on('pointerdown', () => { this.leftPressed = true; });
+                this.leftBtn.on('pointerup', () => { this.leftPressed = false; });
 
-                this.rightBtn.on('pointerdown', () => { this.rightPressed = true; this.player.setVelocityX(220); });
-                this.rightBtn.on('pointerup', () => { this.rightPressed = false; this.player.setVelocityX(0); });
+                this.rightBtn.on('pointerdown', () => { this.rightPressed = true; });
+                this.rightBtn.on('pointerup', () => { this.rightPressed = false; });
 
                 this.jumpBtn.on('pointerdown', () => {
-                    if (this.player.body.blocked.down) { this.player.setVelocityY(-550); this.canDoubleJump = true; }
-                    else if (this.canDoubleJump) { this.player.setVelocityY(-800); this.canDoubleJump = false; }
-                    if (navigator.vibrate) navigator.vibrate(50);
+                    if (this.player.body.blocked.down) {
+                        this.player.setVelocityY(-550);
+                        this.canDoubleJump = true;
+                    } else if (this.canDoubleJump) {
+                        this.player.setVelocityY(-800);
+                        this.canDoubleJump = false;
+                    }
                 });
             }
         }
@@ -174,8 +191,13 @@ window.addEventListener('load', function () {
                 else this.player.setVelocityX(0);
 
                 if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
-                    if (this.player.body.blocked.down) { this.player.setVelocityY(-550); this.canDoubleJump = true; }
-                    else if (this.canDoubleJump) { this.player.setVelocityY(-800); this.canDoubleJump = false; }
+                    if (this.player.body.blocked.down) {
+                        this.player.setVelocityY(-550);
+                        this.canDoubleJump = true;
+                    } else if (this.canDoubleJump) {
+                        this.player.setVelocityY(-800);
+                        this.canDoubleJump = false;
+                    }
                 }
             } else {
                 if (this.leftPressed) this.player.setVelocityX(-220);
@@ -183,9 +205,10 @@ window.addEventListener('load', function () {
                 else if (this.player.body.blocked.down) this.player.setVelocityX(0);
             }
 
-            if (this.player.y > 450) this.scene.restart({ playerName: this.playerName });
+            if (this.player.y > 450) {
+                this.scene.restart({ playerName: this.playerName });
+            }
 
-            /* --- Football-Schwebeanimation --- */
             this.footballs.children.iterate(ball => {
                 ball.y = ball.baseY + Math.sin(time / 500 + ball.phase) * 12;
             });
@@ -237,7 +260,8 @@ window.addEventListener('load', function () {
                         } else this.showQuestion();
                     } else {
                         this.feedback = this.add.text(200, 350, 'FALSCH – probiere es nochmals', {
-                            font: '28px Arial', fill: '#ff0000'
+                            font: '28px Arial',
+                            fill: '#ff0000'
                         });
                     }
                 });
@@ -255,7 +279,7 @@ window.addEventListener('load', function () {
         create() {
             this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
             this.add.text(120, 180,
-                `Glückwunsch ${this.playerName}!\n\n Du bist herzlich eingeladen zur \nSUPER BOWL PARTY\n am 08.02.2026\n in Elsbethen`,
+                `Glückwunsch ${this.playerName}!\n\nDu bist herzlich eingeladen zur\nSUPER BOWL PARTY\nam 08.02.2026\nin Elsbethen`,
                 { font: '28px Arial', fill: '#ffffff', align: 'center' }
             );
         }
@@ -272,4 +296,3 @@ window.addEventListener('load', function () {
     });
 
 });
-
