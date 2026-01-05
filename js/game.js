@@ -44,7 +44,7 @@ window.addEventListener('load', function () {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
-            this.load.image('background', 'assets/sprites/background1.png');
+            this.load.image('background', 'assets/sprites/background.png');
 
             this.load.image('btn_left', 'assets/sprites/btn_left.png');
             this.load.image('btn_right', 'assets/sprites/btn_right.png');
@@ -296,3 +296,4 @@ window.addEventListener('load', function () {
     });
 
 });
+
