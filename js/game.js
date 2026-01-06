@@ -41,7 +41,7 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         preload() {
-            this.load.image('player1', 'assets/sprites/player2.png');
+            this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
             this.load.image('background', 'assets/sprites/background.png');
@@ -90,28 +90,17 @@ window.addEventListener('load', function () {
                 .setTint(0xffd700)
                 .refreshBody();
 
-            this.add.text(4600, 150, 'ZIEL', {
+            this.goalText = this.add.text(4600, 150, 'ZIEL', {
                 font: '28px Arial',
                 fill: '#ffd700',
                 stroke: '#000',
                 strokeThickness: 4
             }).setOrigin(0.5);
 
-            /* ---------- Spieler (STABIL) ---------- */
-            this.player = this.physics.add.sprite(150, 200, 'player1');
+            /* ---------- Spieler ---------- */
+            this.player = this.physics.add.sprite(150, 200, 'player');
             this.player.setGravityY(900);
             this.player.setBounce(0);
-
-            // sichere automatische Skalierung
-            const platformH = this.textures.get('platform').getSourceImage().height;
-            const playerH = this.textures.get('player1').getSourceImage().height;
-            const scale = (platformH * 0.7) / playerH;
-
-            this.player.setScale(scale);
-            this.player.body.setSize(
-                this.player.frame.width,
-                this.player.frame.height
-            );
 
             this.canDoubleJump = true;
             this.reachedGoal = false;
@@ -126,7 +115,6 @@ window.addEventListener('load', function () {
                 if (platform === this.goalPlatform && !this.reachedGoal) {
                     if (this.footballCount === this.totalFootballs) {
                         this.reachedGoal = true;
-                        this.bgm.stop();
                         this.scene.start('QuizScene', { playerName: this.playerName });
                     }
                 }
@@ -164,6 +152,14 @@ window.addEventListener('load', function () {
             this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
             this.bgm.play();
 
+            this.events.once('shutdown', () => {
+                if (this.bgm) {
+                    this.bgm.stop();
+                    this.bgm.destroy();
+                    this.bgm = null;
+                }
+            });
+
             /* ---------- Mobile Buttons ---------- */
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
 
@@ -175,11 +171,11 @@ window.addEventListener('load', function () {
                 this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.6);
                 this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.6);
 
-                this.leftBtn.on('pointerdown', () => this.leftPressed = true);
-                this.leftBtn.on('pointerup', () => this.leftPressed = false);
+                this.leftBtn.on('pointerdown', () => { this.leftPressed = true; });
+                this.leftBtn.on('pointerup', () => { this.leftPressed = false; });
 
-                this.rightBtn.on('pointerdown', () => this.rightPressed = true);
-                this.rightBtn.on('pointerup', () => this.rightPressed = false);
+                this.rightBtn.on('pointerdown', () => { this.rightPressed = true; });
+                this.rightBtn.on('pointerup', () => { this.rightPressed = false; });
 
                 this.jumpBtn.on('pointerdown', () => {
                     if (this.player.body.blocked.down) {
@@ -307,5 +303,3 @@ window.addEventListener('load', function () {
     });
 
 });
-
-
