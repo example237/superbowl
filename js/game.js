@@ -44,7 +44,7 @@ window.addEventListener('load', function () {
             this.load.image('player', 'assets/sprites/player.png');
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
-            this.load.image('background', 'assets/sprites/background.png');
+            this.load.image('background', 'assets/sprites/background1.png');
 
             this.load.image('btn_left', 'assets/sprites/btn_left.png');
             this.load.image('btn_right', 'assets/sprites/btn_right.png');
@@ -59,7 +59,7 @@ window.addEventListener('load', function () {
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
-            /* ---------- Hintergrund ---------- */
+            /* ---------- Hintergrund (Tile) ---------- */
             this.bg = this.add.tileSprite(
                 worldWidth / 2,
                 225,
@@ -98,7 +98,7 @@ window.addEventListener('load', function () {
             }).setOrigin(0.5);
 
             /* ---------- Spieler ---------- */
-            this.player = this.physics.add.sprite(150, 200, 'player');
+            this.player = this.physics.add.sprite(150, 250, 'player');
             this.player.setGravityY(900);
             this.player.setBounce(0);
 
@@ -115,6 +115,7 @@ window.addEventListener('load', function () {
                 if (platform === this.goalPlatform && !this.reachedGoal) {
                     if (this.footballCount === this.totalFootballs) {
                         this.reachedGoal = true;
+                        if (this.bgm) this.bgm.stop();
                         this.scene.start('QuizScene', { playerName: this.playerName });
                     }
                 }
@@ -132,7 +133,6 @@ window.addEventListener('load', function () {
                 { x: 1500, y: 160 }, { x: 2300, y: 180 },
                 { x: 3200, y: 180 }, { x: 4400, y: 180 }
             ];
-
             this.totalFootballs = footballData.length;
 
             footballData.forEach(f => {
@@ -149,16 +149,10 @@ window.addEventListener('load', function () {
             });
 
             /* ---------- Musik ---------- */
-            this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
-            this.bgm.play();
-
-            this.events.once('shutdown', () => {
-                if (this.bgm) {
-                    this.bgm.stop();
-                    this.bgm.destroy();
-                    this.bgm = null;
-                }
-            });
+            if (!this.sound.get('bgm')) {
+                this.bgm = this.sound.add('bgm', { loop: true, volume: 0.4 });
+                this.bgm.play();
+            }
 
             /* ---------- Mobile Buttons ---------- */
             const isMobile = this.sys.game.device.os.android || this.sys.game.device.os.iOS || window.innerWidth <= 768;
@@ -171,11 +165,11 @@ window.addEventListener('load', function () {
                 this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.6);
                 this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.6);
 
-                this.leftBtn.on('pointerdown', () => { this.leftPressed = true; });
-                this.leftBtn.on('pointerup', () => { this.leftPressed = false; });
+                this.leftBtn.on('pointerdown', () => this.leftPressed = true);
+                this.leftBtn.on('pointerup', () => this.leftPressed = false);
 
-                this.rightBtn.on('pointerdown', () => { this.rightPressed = true; });
-                this.rightBtn.on('pointerup', () => { this.rightPressed = false; });
+                this.rightBtn.on('pointerdown', () => this.rightPressed = true);
+                this.rightBtn.on('pointerup', () => this.rightPressed = false);
 
                 this.jumpBtn.on('pointerdown', () => {
                     if (this.player.body.blocked.down) {
@@ -207,12 +201,19 @@ window.addEventListener('load', function () {
                     }
                 }
             } else {
-                if (this.leftPressed) this.player.setVelocityX(-220);
-                else if (this.rightPressed) this.player.setVelocityX(220);
-                else if (this.player.body.blocked.down) this.player.setVelocityX(0);
+                if (this.leftPressed) {
+                    this.player.setVelocityX(-220);
+                } else if (this.rightPressed) {
+                    this.player.setVelocityX(220);
+                } else if (this.player.body.blocked.down) {
+                    // ✅ Mobile-Bodenbremse (kein Rutschen)
+                    this.player.setVelocityX(0);
+                    this.player.body.velocity.x = 0;
+                }
             }
 
             if (this.player.y > 450) {
+                if (this.bgm) this.bgm.stop();
                 this.scene.restart({ playerName: this.playerName });
             }
 
@@ -264,7 +265,9 @@ window.addEventListener('load', function () {
                         this.index++;
                         if (this.index >= this.questions.length) {
                             this.scene.start('EndScene', { playerName: this.playerName });
-                        } else this.showQuestion();
+                        } else {
+                            this.showQuestion();
+                        }
                     } else {
                         this.feedback = this.add.text(200, 350, 'FALSCH – probiere es nochmals', {
                             font: '28px Arial',
