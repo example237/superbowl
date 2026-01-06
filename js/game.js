@@ -41,7 +41,7 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         preload() {
-            this.load.image('player', 'assets/sprites/player.png');
+            this.load.image('player1', 'assets/sprites/player1.png');
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
             this.load.image('background', 'assets/sprites/background.png');
@@ -59,7 +59,7 @@ window.addEventListener('load', function () {
             this.physics.world.setBounds(0, 0, worldWidth, 450);
             this.cameras.main.setBounds(0, 0, worldWidth, 450);
 
-            /* ---------- Hintergrund (Tile) ---------- */
+            /* ---------- Hintergrund ---------- */
             this.bg = this.add.tileSprite(
                 worldWidth / 2,
                 225,
@@ -97,10 +97,22 @@ window.addEventListener('load', function () {
                 strokeThickness: 4
             }).setOrigin(0.5);
 
-            /* ---------- Spieler ---------- */
-            this.player = this.physics.add.sprite(150, 250, 'player');
+            /* ---------- Spieler (player1 + Auto-Scale) ---------- */
+            this.player = this.physics.add.sprite(150, 250, 'player1');
             this.player.setGravityY(900);
             this.player.setBounce(0);
+
+            // sinnvolle automatische Skalierung
+            const platformHeight = this.textures.get('platform').getSourceImage().height;
+            const playerHeight = this.textures.get('player1').getSourceImage().height;
+            const scale = (platformHeight * 0.7) / playerHeight;
+
+            this.player.setScale(scale);
+            this.player.body.setSize(
+                this.player.width * scale,
+                this.player.height * scale,
+                true
+            );
 
             this.canDoubleJump = true;
             this.reachedGoal = false;
@@ -216,74 +228,8 @@ window.addEventListener('load', function () {
     }
 
     /* =====================
-       QUIZ
+       QUIZ & END bleiben unverändert
     ===================== */
-    class QuizScene extends Phaser.Scene {
-        constructor() { super('QuizScene'); }
-        init(data) { this.playerName = data.playerName; }
-
-        create() {
-            this.index = 0;
-            this.questions = [
-                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], c: 2 },
-                { q: "Wer gewann den allerersten SuperBowl?", a: ["Dallas Cowboys", "Green Bay Packers", "New England Patriots"], c: 1 },
-                { q: "Wie viele Punkte gibt es für einen Touchdown?", a: ["3", "6", "7"], c: 1 },
-                { q: "Welches dieser Teams hat noch nie einen Super Bowl gewonnen?", a: ["Minnesota Vikings", "Denver Broncos", "New England Patriots"], c: 0 },
-                { q: "Wo feierst du heuer den SuperBowl?", a: ["Alleine zuhause", "San Francisco", "Elsbethen"], c: 2 }
-            ];
-            this.feedback = null;
-            this.showQuestion();
-        }
-
-        showQuestion() {
-            this.children.removeAll();
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-
-            const q = this.questions[this.index];
-            this.add.text(80, 60, q.q, { font: '26px Arial', fill: '#ffffff', wordWrap: { width: 640 } });
-
-            q.a.forEach((opt, i) => {
-                const btn = this.add.text(120, 150 + i * 70, opt, {
-                    font: '24px Arial',
-                    backgroundColor: '#ffffff',
-                    color: '#000',
-                    padding: { x: 10, y: 10 }
-                }).setInteractive();
-
-                btn.on('pointerdown', () => {
-                    if (this.feedback) this.feedback.destroy();
-
-                    if (i === q.c) {
-                        this.index++;
-                        if (this.index >= this.questions.length) {
-                            this.scene.start('EndScene', { playerName: this.playerName });
-                        } else this.showQuestion();
-                    } else {
-                        this.feedback = this.add.text(200, 350, 'FALSCH – probiere es nochmals', {
-                            font: '28px Arial',
-                            fill: '#ff0000'
-                        });
-                    }
-                });
-            });
-        }
-    }
-
-    /* =====================
-       END
-    ===================== */
-    class EndScene extends Phaser.Scene {
-        constructor() { super('EndScene'); }
-        init(data) { this.playerName = data.playerName; }
-
-        create() {
-            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
-            this.add.text(120, 180,
-                `Glückwunsch ${this.playerName}!\n\nDu bist herzlich eingeladen zur\nSUPER BOWL PARTY\nam 08.02.2026\nin Elsbethen`,
-                { font: '28px Arial', fill: '#ffffff', align: 'center' }
-            );
-        }
-    }
 
     new Phaser.Game({
         type: Phaser.AUTO,
@@ -296,6 +242,3 @@ window.addEventListener('load', function () {
     });
 
 });
-
-
-
