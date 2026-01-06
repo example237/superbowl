@@ -90,28 +90,27 @@ window.addEventListener('load', function () {
                 .setTint(0xffd700)
                 .refreshBody();
 
-            this.goalText = this.add.text(4600, 150, 'ZIEL', {
+            this.add.text(4600, 150, 'ZIEL', {
                 font: '28px Arial',
                 fill: '#ffd700',
                 stroke: '#000',
                 strokeThickness: 4
             }).setOrigin(0.5);
 
-            /* ---------- Spieler (player1 + Auto-Scale) ---------- */
+            /* ---------- Spieler (STABIL) ---------- */
             this.player = this.physics.add.sprite(150, 250, 'player1');
             this.player.setGravityY(900);
             this.player.setBounce(0);
 
-            // sinnvolle automatische Skalierung
-            const platformHeight = this.textures.get('platform').getSourceImage().height;
-            const playerHeight = this.textures.get('player1').getSourceImage().height;
-            const scale = (platformHeight * 0.7) / playerHeight;
+            // sichere automatische Skalierung
+            const platformH = this.textures.get('platform').getSourceImage().height;
+            const playerH = this.textures.get('player1').getSourceImage().height;
+            const scale = (platformH * 0.7) / playerH;
 
             this.player.setScale(scale);
             this.player.body.setSize(
-                this.player.width * scale,
-                this.player.height * scale,
-                true
+                this.player.frame.width,
+                this.player.frame.height
             );
 
             this.canDoubleJump = true;
@@ -176,11 +175,11 @@ window.addEventListener('load', function () {
                 this.rightBtn = this.add.image(240, 370, 'btn_right').setInteractive().setScrollFactor(0).setScale(1.6);
                 this.jumpBtn = this.add.image(680, 370, 'btn_jump').setInteractive().setScrollFactor(0).setScale(1.6);
 
-                this.leftBtn.on('pointerdown', () => { this.leftPressed = true; });
-                this.leftBtn.on('pointerup', () => { this.leftPressed = false; });
+                this.leftBtn.on('pointerdown', () => this.leftPressed = true);
+                this.leftBtn.on('pointerup', () => this.leftPressed = false);
 
-                this.rightBtn.on('pointerdown', () => { this.rightPressed = true; });
-                this.rightBtn.on('pointerup', () => { this.rightPressed = false; });
+                this.rightBtn.on('pointerdown', () => this.rightPressed = true);
+                this.rightBtn.on('pointerup', () => this.rightPressed = false);
 
                 this.jumpBtn.on('pointerdown', () => {
                     if (this.player.body.blocked.down) {
@@ -228,8 +227,74 @@ window.addEventListener('load', function () {
     }
 
     /* =====================
-       QUIZ & END bleiben unverändert
+       QUIZ
     ===================== */
+    class QuizScene extends Phaser.Scene {
+        constructor() { super('QuizScene'); }
+        init(data) { this.playerName = data.playerName; }
+
+        create() {
+            this.index = 0;
+            this.questions = [
+                { q: "Wie viele Spieler stehen pro Team auf dem Feld?", a: ["9", "10", "11"], c: 2 },
+                { q: "Wer gewann den allerersten SuperBowl?", a: ["Dallas Cowboys", "Green Bay Packers", "New England Patriots"], c: 1 },
+                { q: "Wie viele Punkte gibt es für einen Touchdown?", a: ["3", "6", "7"], c: 1 },
+                { q: "Welches dieser Teams hat noch nie einen Super Bowl gewonnen?", a: ["Minnesota Vikings", "Denver Broncos", "New England Patriots"], c: 0 },
+                { q: "Wo feierst du heuer den SuperBowl?", a: ["Alleine zuhause", "San Francisco", "Elsbethen"], c: 2 }
+            ];
+            this.feedback = null;
+            this.showQuestion();
+        }
+
+        showQuestion() {
+            this.children.removeAll();
+            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
+
+            const q = this.questions[this.index];
+            this.add.text(80, 60, q.q, { font: '26px Arial', fill: '#ffffff', wordWrap: { width: 640 } });
+
+            q.a.forEach((opt, i) => {
+                const btn = this.add.text(120, 150 + i * 70, opt, {
+                    font: '24px Arial',
+                    backgroundColor: '#ffffff',
+                    color: '#000',
+                    padding: { x: 10, y: 10 }
+                }).setInteractive();
+
+                btn.on('pointerdown', () => {
+                    if (this.feedback) this.feedback.destroy();
+
+                    if (i === q.c) {
+                        this.index++;
+                        if (this.index >= this.questions.length) {
+                            this.scene.start('EndScene', { playerName: this.playerName });
+                        } else this.showQuestion();
+                    } else {
+                        this.feedback = this.add.text(200, 350, 'FALSCH – probiere es nochmals', {
+                            font: '28px Arial',
+                            fill: '#ff0000'
+                        });
+                    }
+                });
+            });
+        }
+    }
+
+    /* =====================
+       END
+    ===================== */
+    class EndScene extends Phaser.Scene {
+        constructor() { super('EndScene'); }
+        init(data) { this.playerName = data.playerName; }
+
+        create() {
+            this.add.rectangle(400, 225, 800, 450, 0x1E3A8A);
+            this.add.text(120, 180,
+                `Glückwunsch ${this.playerName}!\n\nDu bist herzlich eingeladen zur\nSUPER BOWL PARTY\nam 08.02.2026\nin Elsbethen`,
+                { font: '28px Arial', fill: '#ffffff', align: 'center' }
+            );
+        }
+    }
 
     new Phaser.Game({
         type: Phaser.AUTO,
