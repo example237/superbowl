@@ -41,7 +41,7 @@ window.addEventListener('load', function () {
         init(data) { this.playerName = data.playerName; }
 
         preload() {
-            this.load.image('player1', 'assets/sprites/player1.png');
+            this.load.image('player1', 'assets/sprites/player2.png');
             this.load.image('platform', 'assets/sprites/platform.png');
             this.load.image('football', 'assets/sprites/ball.png');
             this.load.image('background', 'assets/sprites/background.png');
@@ -307,4 +307,5 @@ window.addEventListener('load', function () {
     });
 
 });
+
 
