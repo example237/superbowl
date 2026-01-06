@@ -98,7 +98,7 @@ window.addEventListener('load', function () {
             }).setOrigin(0.5);
 
             /* ---------- Spieler (STABIL) ---------- */
-            this.player = this.physics.add.sprite(150, 250, 'player1');
+            this.player = this.physics.add.sprite(150, 200, 'player1');
             this.player.setGravityY(900);
             this.player.setBounce(0);
 
@@ -307,3 +307,4 @@ window.addEventListener('load', function () {
     });
 
 });
+
